@@ -1,7 +1,7 @@
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Smart Classroom Layout Generator & PAK-21 Visualizer</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -19,28 +19,39 @@
                             700: '#15803d',
                             900: '#14532d',
                         },
-                        darkbg: '#0f172a',
-                        darkcard: '#1e293b'
+                        darkbg: '#0b0f19',
+                        darkcard: '#151d30',
+                        panelbg: '#1e293b'
                     }
                 }
             }
         }
     </script>
-    <!-- Lucide Icons -->
+    <!-- Lucide Icons & FontAwesome -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Three.js CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js & OrbitControls -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
+            user-select: none;
+            -webkit-user-select: none;
         }
-        /* Custom Scrollbars */
+
+        /* Custom Scrollbar Styling */
         ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
         }
         ::-webkit-scrollbar-track {
             background: rgba(15, 23, 42, 0.6);
@@ -52,65 +63,93 @@
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(148, 163, 184, 0.8);
         }
+
         .glass-panel {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(21, 29, 48, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
+
         .light .glass-panel {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
             border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        /* Printable PDF Styling */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #modalAiReport, #modalAiReport * {
+                visibility: visible;
+            }
+            #modalAiReport {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: auto;
+                background: white !important;
+                color: black !important;
+            }
+            .no-print {
+                display: none !important;
+            }
         }
     </style>
 </head>
-<body class="bg-darkbg text-slate-100 min-h-screen flex flex-col transition-colors duration-200 select-none">
+<body class="bg-darkbg text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
 
-    <!-- HEADER & CONTROLS -->
-    <header class="glass-panel sticky top-0 z-30 px-4 py-3 flex flex-wrap items-center justify-between gap-4 border-b border-slate-700/50">
+    <!-- TOP HEADER / CONTROL BAR -->
+    <header class="glass-panel sticky top-0 z-30 px-3 md:px-5 py-2.5 flex items-center justify-between gap-2 border-b border-slate-800">
+        <!-- Logo & Branding -->
         <div class="flex items-center space-x-3">
-            <div class="p-2 bg-gradient-to-tr from-emerald-600 to-teal-500 rounded-xl shadow-lg shadow-emerald-500/20">
-                <i data-lucide="layout-grid" class="w-6 h-6 text-white"></i>
+            <div class="p-2 bg-gradient-to-tr from-emerald-600 to-teal-500 rounded-xl shadow-lg shadow-emerald-500/20 shrink-0">
+                <i data-lucide="layout-grid" class="w-5 h-5 md:w-6 md:h-6 text-white"></i>
             </div>
             <div>
-                <h1 class="font-bold text-lg leading-tight tracking-wide text-white dark:text-white light:text-slate-900">PAK-21 Smart Layout</h1>
-                <p class="text-xs text-emerald-400 font-medium">Interactive Classroom Visualizer & AI Diagnostics</p>
+                <h1 class="font-bold text-sm md:text-base leading-tight text-white dark:text-white light:text-slate-900 flex items-center gap-2">
+                    PAK-21 Smart Classroom Layout
+                    <span class="hidden sm:inline-block px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full font-mono">v2.5 Responsive</span>
+                </h1>
+                <p class="text-[10px] md:text-xs text-emerald-400 font-medium">Spatial Design, Pedagogy Metrics & AI Diagnostic Audit</p>
             </div>
         </div>
 
-        <!-- Controls Toolbar -->
-        <div class="flex flex-wrap items-center gap-3 text-sm">
-            <!-- Dimensions -->
-            <div class="flex items-center space-x-2 bg-slate-800/80 light:bg-slate-200 px-3 py-1.5 rounded-lg border border-slate-700/60 light:border-slate-300">
+        <!-- Desktop Main Toolbar -->
+        <div class="hidden lg:flex items-center gap-3 text-xs">
+            <!-- Room Dimensions -->
+            <div class="flex items-center space-x-2 bg-slate-800/90 light:bg-slate-200 px-3 py-1.5 rounded-xl border border-slate-700/70">
                 <i data-lucide="ruler" class="w-4 h-4 text-emerald-400"></i>
-                <span class="text-xs font-medium text-slate-300 light:text-slate-700">Dim (m):</span>
-                <input type="number" id="roomLength" value="10" min="5" max="25" class="w-12 bg-slate-900 light:bg-white text-center rounded text-xs py-0.5 border border-slate-700 focus:outline-none focus:border-emerald-500">
-                <span class="text-xs text-slate-400">×</span>
-                <input type="number" id="roomWidth" value="8" min="4" max="20" class="w-12 bg-slate-900 light:bg-white text-center rounded text-xs py-0.5 border border-slate-700 focus:outline-none focus:border-emerald-500">
+                <span class="font-medium text-slate-300 light:text-slate-700">Dim (m):</span>
+                <input type="number" id="roomLength" value="10" min="5" max="25" class="w-12 bg-slate-900 light:bg-white text-center rounded py-0.5 border border-slate-700 text-xs focus:outline-none focus:border-emerald-500">
+                <span class="text-slate-500">×</span>
+                <input type="number" id="roomWidth" value="8" min="4" max="20" class="w-12 bg-slate-900 light:bg-white text-center rounded py-0.5 border border-slate-700 text-xs focus:outline-none focus:border-emerald-500">
             </div>
 
             <!-- Target Capacity -->
-            <div class="flex items-center space-x-2 bg-slate-800/80 light:bg-slate-200 px-3 py-1.5 rounded-lg border border-slate-700/60 light:border-slate-300">
+            <div class="flex items-center space-x-2 bg-slate-800/90 light:bg-slate-200 px-3 py-1.5 rounded-xl border border-slate-700/70">
                 <i data-lucide="users" class="w-4 h-4 text-teal-400"></i>
-                <span class="text-xs font-medium text-slate-300 light:text-slate-700">Target Students:</span>
-                <input type="number" id="targetStudents" value="30" min="5" max="60" class="w-12 bg-slate-900 light:bg-white text-center rounded text-xs py-0.5 border border-slate-700 focus:outline-none focus:border-emerald-500">
+                <span class="font-medium text-slate-300 light:text-slate-700">Target Students:</span>
+                <input type="number" id="targetStudents" value="30" min="5" max="60" class="w-12 bg-slate-900 light:bg-white text-center rounded py-0.5 border border-slate-700 text-xs focus:outline-none focus:border-emerald-500">
             </div>
 
-            <!-- Visual Overlays Toggles -->
-            <div class="flex items-center gap-1 bg-slate-800/80 light:bg-slate-200 p-1 rounded-lg border border-slate-700/60 light:border-slate-300">
-                <button id="toggleSightlinesBtn" class="px-2 py-1 rounded text-xs flex items-center gap-1 bg-emerald-600/30 text-emerald-300 border border-emerald-500/40" title="Toggle Teacher Visibility Sightlines">
+            <!-- Overlays & Toggles -->
+            <div class="flex items-center gap-1 bg-slate-800/90 light:bg-slate-200 p-1 rounded-xl border border-slate-700/70">
+                <button id="toggleSightlinesBtn" class="px-2.5 py-1 rounded-lg text-xs flex items-center gap-1.5 bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 font-medium">
                     <i data-lucide="eye" class="w-3.5 h-3.5"></i> Sightlines
                 </button>
-                <button id="toggleFlowBtn" class="px-2 py-1 rounded text-xs flex items-center gap-1 bg-teal-600/30 text-teal-300 border border-teal-500/40" title="Toggle Circulation Pathways">
-                    <i data-lucide="footprints" class="w-3.5 h-3.5"></i> Pathways
+                <button id="toggleFlowBtn" class="px-2.5 py-1 rounded-lg text-xs flex items-center gap-1.5 bg-teal-600/30 text-teal-300 border border-teal-500/40 font-medium">
+                    <i data-lucide="footprints" class="w-3.5 h-3.5"></i> Flow Lines
                 </button>
-                <button id="toggleGridBtn" class="px-2 py-1 rounded text-xs flex items-center gap-1 bg-indigo-600/30 text-indigo-300 border border-indigo-500/40" title="Toggle Grid Snapping">
+                <button id="toggleGridBtn" class="px-2.5 py-1 rounded-lg text-xs flex items-center gap-1.5 bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 font-medium">
                     <i data-lucide="grid" class="w-3.5 h-3.5"></i> Snap Grid
                 </button>
             </div>
 
-            <!-- Actions -->
+            <!-- Primary Actions -->
             <div class="flex items-center gap-2">
                 <button id="resetCanvasBtn" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition" title="Clear Canvas">
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
@@ -118,193 +157,195 @@
                 <button id="exportImgBtn" class="p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition" title="Export Image">
                     <i data-lucide="download" class="w-4 h-4"></i>
                 </button>
-                <button id="open3dBtn" class="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium rounded-lg shadow-md flex items-center gap-1.5 transition text-xs">
-                    <i data-lucide="box" class="w-4 h-4"></i> 3D View
+                <button id="open3dBtn" class="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium rounded-xl shadow-md flex items-center gap-1.5 transition">
+                    <i data-lucide="box" class="w-4 h-4"></i> 3D Orbit
                 </button>
-                <button id="generateAiReportBtn" class="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-lg shadow-md shadow-emerald-600/20 flex items-center gap-1.5 transition text-xs">
+                <button id="generateAiReportBtn" class="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-600/20 flex items-center gap-1.5 transition">
                     <i data-lucide="sparkles" class="w-4 h-4"></i> PAK-21 AI Audit
                 </button>
-                <button id="themeToggleBtn" class="p-2 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition" title="Toggle Dark/Light Mode">
+                <button id="themeToggleBtn" class="p-2 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition" title="Toggle Light/Dark Theme">
                     <i data-lucide="sun" class="w-4 h-4"></i>
                 </button>
             </div>
         </div>
+
+        <!-- Mobile Header Actions -->
+        <div class="flex lg:hidden items-center gap-2">
+            <button id="mobileSettingsToggleBtn" class="p-2 text-slate-300 bg-slate-800/90 rounded-xl border border-slate-700">
+                <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+            </button>
+        </div>
     </header>
 
+    <!-- MOBILE QUICK SETTINGS DRAWER -->
+    <div id="mobileSettingsDrawer" class="hidden lg:hidden bg-slate-900 border-b border-slate-800 p-3 flex-col gap-3 text-xs z-20">
+        <div class="flex justify-between items-center gap-2">
+            <div class="flex items-center space-x-1.5">
+                <i data-lucide="ruler" class="w-3.5 h-3.5 text-emerald-400"></i>
+                <span class="text-slate-300">Dim (m):</span>
+                <input type="number" id="roomLengthMob" value="10" min="5" max="25" class="w-10 bg-slate-800 text-center rounded py-0.5 border border-slate-700">
+                <span class="text-slate-500">×</span>
+                <input type="number" id="roomWidthMob" value="8" min="4" max="20" class="w-10 bg-slate-800 text-center rounded py-0.5 border border-slate-700">
+            </div>
+            <div class="flex items-center space-x-1.5">
+                <i data-lucide="users" class="w-3.5 h-3.5 text-teal-400"></i>
+                <span class="text-slate-300">Target:</span>
+                <input type="number" id="targetStudentsMob" value="30" min="5" max="60" class="w-10 bg-slate-800 text-center rounded py-0.5 border border-slate-700">
+            </div>
+        </div>
+        <div class="flex items-center justify-between gap-1 pt-2 border-t border-slate-800">
+            <div class="flex gap-1">
+                <button id="toggleSightlinesBtnMob" class="px-2 py-1 rounded-lg text-[10px] bg-emerald-600/30 text-emerald-300 border border-emerald-500/40">Sightlines</button>
+                <button id="toggleFlowBtnMob" class="px-2 py-1 rounded-lg text-[10px] bg-teal-600/30 text-teal-300 border border-teal-500/40">Flow Lines</button>
+            </div>
+            <div class="flex items-center gap-1">
+                <button id="exportImgBtnMob" class="p-1.5 text-slate-300 bg-slate-800 rounded-lg"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
+                <button id="themeToggleBtnMob" class="p-1.5 text-slate-400 bg-slate-800 rounded-lg"><i data-lucide="sun" class="w-3.5 h-3.5"></i></button>
+                <button id="resetCanvasBtnMob" class="p-1.5 text-rose-400 bg-slate-800 rounded-lg"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+            </div>
+        </div>
+    </div>
+
     <!-- MAIN APP CONTAINER -->
-    <main class="flex-1 flex overflow-hidden relative">
-        <!-- LEFT SIDEBAR: PRESETS & PALETTE -->
-        <aside class="w-80 glass-panel border-r border-slate-700/50 flex flex-col h-[calc(100vh-65px)] z-20 shrink-0">
-            <!-- Tabs -->
-            <div class="flex border-b border-slate-700/60 bg-slate-900/50">
-                <button id="tabPresets" class="flex-1 py-2.5 text-xs font-semibold text-emerald-400 border-b-2 border-emerald-500 flex items-center justify-center gap-1.5">
+    <main class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
+        
+        <!-- LEFT SIDEBAR: PRESETS & PALETTE (DESKTOP & MOBILE BOTTOM DRAWER) -->
+        <aside id="leftSidebar" class="w-full lg:w-80 glass-panel border-r border-slate-800 flex flex-col h-[40vh] lg:h-[calc(100vh-60px)] z-20 shrink-0 transition-all duration-300 hidden lg:flex">
+            <!-- Sidebar Navigation Tabs -->
+            <div class="flex border-b border-slate-800 bg-slate-900/60">
+                <button id="tabPresets" class="flex-1 py-3 text-xs font-semibold text-emerald-400 border-b-2 border-emerald-500 flex items-center justify-center gap-1.5">
                     <i data-lucide="layout-template" class="w-3.5 h-3.5"></i> PAK-21 Presets
                 </button>
-                <button id="tabPalette" class="flex-1 py-2.5 text-xs font-semibold text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5">
-                    <i data-lucide="armchair" class="w-3.5 h-3.5"></i> Furniture & Add
+                <button id="tabPalette" class="flex-1 py-3 text-xs font-semibold text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5">
+                    <i data-lucide="armchair" class="w-3.5 h-3.5"></i> Furniture Palette
                 </button>
             </div>
 
-            <!-- Tab Content Container -->
+            <!-- Sidebar Scrollable Container -->
             <div class="flex-1 overflow-y-auto p-4 space-y-4">
                 
                 <!-- PRESETS PANEL -->
                 <div id="panelPresets" class="space-y-3">
-                    <p class="text-xs text-slate-400">Select standard 21st Century Learning (PAK-21) layouts to auto-generate arrangements:</p>
+                    <p class="text-xs text-slate-400 leading-relaxed">Select a standard 21st Century Learning (PAK-21) layout model to auto-generate desk arrangements:</p>
                     
-                    <button data-preset="kumpulan" class="preset-btn w-full p-3 rounded-xl bg-slate-800/80 hover:bg-emerald-950/40 border border-slate-700 hover:border-emerald-500/50 text-left transition group">
+                    <button data-preset="kumpulan" class="preset-btn w-full p-3 rounded-xl bg-slate-800/80 hover:bg-emerald-950/40 border border-slate-700/80 hover:border-emerald-500/50 text-left transition group">
                         <div class="flex items-center justify-between mb-1">
-                            <span class="font-semibold text-sm text-slate-200 group-hover:text-emerald-400 flex items-center gap-1.5">
+                            <span class="font-semibold text-xs text-slate-200 group-hover:text-emerald-400 flex items-center gap-1.5">
                                 <i data-lucide="users" class="w-4 h-4 text-emerald-400"></i> Kumpulan (Clusters)
                             </span>
-                            <span class="text-[10px] px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full">High Collab</span>
+                            <span class="text-[9px] px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full font-mono">High Collab</span>
                         </div>
-                        <p class="text-xs text-slate-400">4-6 student desk clusters. Ideal for group work, problem-solving & discussion.</p>
+                        <p class="text-[11px] text-slate-400">4-6 student desk clusters. Ideal for group work, problem-solving & discussion.</p>
                     </button>
 
-                    <button data-preset="horseshoe" class="preset-btn w-full p-3 rounded-xl bg-slate-800/80 hover:bg-emerald-950/40 border border-slate-700 hover:border-emerald-500/50 text-left transition group">
+                    <button data-preset="horseshoe" class="preset-btn w-full p-3 rounded-xl bg-slate-800/80 hover:bg-emerald-950/40 border border-slate-700/80 hover:border-emerald-500/50 text-left transition group">
                         <div class="flex items-center justify-between mb-1">
-                            <span class="font-semibold text-sm text-slate-200 group-hover:text-emerald-400 flex items-center gap-1.5">
+                            <span class="font-semibold text-xs text-slate-200 group-hover:text-emerald-400 flex items-center gap-1.5">
                                 <i data-lucide="u-turn-left" class="w-4 h-4 text-blue-400 rotate-90"></i> Horseshoe (U-Shape)
                             </span>
-                            <span class="text-[10px] px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full">Presentation</span>
+                            <span class="text-[9px] px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full font-mono">Presentation</span>
                         </div>
-                        <p class="text-xs text-slate-400">U-Shape layout. Maximizes presentation visibility and central interaction zone.</p>
+                        <p class="text-[11px] text-slate-400">U-Shape layout. Maximizes presentation visibility and central interaction zone.</p>
                     </button>
 
-                    <button data-preset="stadium" class="preset-btn w-full p-3 rounded-xl bg-slate-800/80 hover:bg-emerald-950/40 border border-slate-700 hover:border-emerald-500/50 text-left transition group">
+                    <button data-preset="stadium" class="preset-btn w-full p-3 rounded-xl bg-slate-800/80 hover:bg-emerald-950/40 border border-slate-700/80 hover:border-emerald-500/50 text-left transition group">
                         <div class="flex items-center justify-between mb-1">
-                            <span class="font-semibold text-sm text-slate-200 group-hover:text-emerald-400 flex items-center gap-1.5">
+                            <span class="font-semibold text-xs text-slate-200 group-hover:text-emerald-400 flex items-center gap-1.5">
                                 <i data-lucide="layers" class="w-4 h-4 text-purple-400"></i> Stadium / Angled
                             </span>
-                            <span class="text-[10px] px-2 py-0.5 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-full">Focused</span>
+                            <span class="text-[9px] px-2 py-0.5 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-full font-mono">Focused</span>
                         </div>
-                        <p class="text-xs text-slate-400">Angled concentric rows facing center board. Good balance of focus & sightline.</p>
+                        <p class="text-[11px] text-slate-400">Angled concentric rows facing center board. Balance of focus & teacher sightline.</p>
                     </button>
 
-                    <button data-preset="modular" class="preset-btn w-full p-3 rounded-xl bg-slate-800/80 hover:bg-emerald-950/40 border border-slate-700 hover:border-emerald-500/50 text-left transition group">
+                    <button data-preset="modular" class="preset-btn w-full p-3 rounded-xl bg-slate-800/80 hover:bg-emerald-950/40 border border-slate-700/80 hover:border-emerald-500/50 text-left transition group">
                         <div class="flex items-center justify-between mb-1">
-                            <span class="font-semibold text-sm text-slate-200 group-hover:text-emerald-400 flex items-center gap-1.5">
+                            <span class="font-semibold text-xs text-slate-200 group-hover:text-emerald-400 flex items-center gap-1.5">
                                 <i data-lucide="grid-3x3" class="w-4 h-4 text-amber-400"></i> Modular Stations
                             </span>
-                            <span class="text-[10px] px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full">Differentiated</span>
+                            <span class="text-[9px] px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full font-mono">Rotation</span>
                         </div>
-                        <p class="text-xs text-slate-400">Activity stations, round tables, and reading corners for rotation tasks.</p>
+                        <p class="text-[11px] text-slate-400">Activity stations, round tables, and reading corners for rotation tasks.</p>
                     </button>
 
-                    <button data-preset="traditional" class="preset-btn w-full p-3 rounded-xl bg-slate-800/80 hover:bg-emerald-950/40 border border-slate-700 hover:border-emerald-500/50 text-left transition group">
+                    <button data-preset="traditional" class="preset-btn w-full p-3 rounded-xl bg-slate-800/80 hover:bg-emerald-950/40 border border-slate-700/80 hover:border-emerald-500/50 text-left transition group">
                         <div class="flex items-center justify-between mb-1">
-                            <span class="font-semibold text-sm text-slate-200 group-hover:text-emerald-400 flex items-center gap-1.5">
+                            <span class="font-semibold text-xs text-slate-200 group-hover:text-emerald-400 flex items-center gap-1.5">
                                 <i data-lucide="rows" class="w-4 h-4 text-slate-400"></i> Traditional Rows
                             </span>
-                            <span class="text-[10px] px-2 py-0.5 bg-slate-500/10 text-slate-400 border border-slate-500/20 rounded-full">Exam / Direct</span>
+                            <span class="text-[9px] px-2 py-0.5 bg-slate-500/10 text-slate-400 border border-slate-500/20 rounded-full font-mono">Formal Exam</span>
                         </div>
-                        <p class="text-xs text-slate-400">Standard linear seating grid. Best for formal individual examinations.</p>
+                        <p class="text-[11px] text-slate-400">Standard linear seating grid. Best for formal individual examinations.</p>
                     </button>
                 </div>
 
                 <!-- PALETTE PANEL -->
                 <div id="panelPalette" class="space-y-3 hidden">
-                    <p class="text-xs text-slate-400">Click to add furniture items onto the canvas grid:</p>
+                    <p class="text-xs text-slate-400 leading-relaxed">Click to add furniture elements onto the interactive canvas:</p>
                     
                     <div class="grid grid-cols-2 gap-2">
-                        <button data-add="single-desk" class="add-item-btn p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl flex flex-col items-center justify-center text-center group transition">
-                            <div class="w-8 h-8 rounded bg-emerald-500/20 border border-emerald-400 flex items-center justify-center mb-1 group-hover:scale-110 transition">
-                                <i data-lucide="user" class="w-4 h-4 text-emerald-400"></i>
+                        <button data-add="single-desk" class="add-item-btn p-2.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-xl flex flex-col items-center justify-center text-center group transition">
+                            <div class="w-7 h-7 rounded bg-emerald-500/20 border border-emerald-400 flex items-center justify-center mb-1 group-hover:scale-110 transition">
+                                <i data-lucide="user" class="w-3.5 h-3.5 text-emerald-400"></i>
                             </div>
                             <span class="text-xs text-slate-300 font-medium">Single Desk</span>
-                            <span class="text-[10px] text-slate-500">0.7m × 0.6m</span>
+                            <span class="text-[10px] text-slate-500 font-mono">0.7m × 0.6m</span>
                         </button>
 
-                        <button data-add="double-desk" class="add-item-btn p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl flex flex-col items-center justify-center text-center group transition">
-                            <div class="w-10 h-7 rounded bg-teal-500/20 border border-teal-400 flex items-center justify-center mb-1 group-hover:scale-110 transition">
-                                <i data-lucide="users" class="w-4 h-4 text-teal-400"></i>
+                        <button data-add="double-desk" class="add-item-btn p-2.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-xl flex flex-col items-center justify-center text-center group transition">
+                            <div class="w-9 h-6 rounded bg-teal-500/20 border border-teal-400 flex items-center justify-center mb-1 group-hover:scale-110 transition">
+                                <i data-lucide="users" class="w-3.5 h-3.5 text-teal-400"></i>
                             </div>
                             <span class="text-xs text-slate-300 font-medium">Double Desk</span>
-                            <span class="text-[10px] text-slate-500">1.3m × 0.6m</span>
+                            <span class="text-[10px] text-slate-500 font-mono">1.3m × 0.6m</span>
                         </button>
 
-                        <button data-add="round-table" class="add-item-btn p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl flex flex-col items-center justify-center text-center group transition">
-                            <div class="w-8 h-8 rounded-full bg-cyan-500/20 border border-cyan-400 flex items-center justify-center mb-1 group-hover:scale-110 transition">
-                                <i data-lucide="disc" class="w-4 h-4 text-cyan-400"></i>
+                        <button data-add="round-table" class="add-item-btn p-2.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-xl flex flex-col items-center justify-center text-center group transition">
+                            <div class="w-7 h-7 rounded-full bg-cyan-500/20 border border-cyan-400 flex items-center justify-center mb-1 group-hover:scale-110 transition">
+                                <i data-lucide="disc" class="w-3.5 h-3.5 text-cyan-400"></i>
                             </div>
-                            <span class="text-xs text-slate-300 font-medium">Round Cluster</span>
-                            <span class="text-[10px] text-slate-500">Ø 1.4m</span>
+                            <span class="text-xs text-slate-300 font-medium">Round Pod</span>
+                            <span class="text-[10px] text-slate-500 font-mono">Ø 1.4m</span>
                         </button>
 
-                        <button data-add="teacher-desk" class="add-item-btn p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl flex flex-col items-center justify-center text-center group transition">
-                            <div class="w-10 h-7 rounded bg-amber-500/20 border border-amber-400 flex items-center justify-center mb-1 group-hover:scale-110 transition">
-                                <i data-lucide="graduation-cap" class="w-4 h-4 text-amber-400"></i>
+                        <button data-add="teacher-desk" class="add-item-btn p-2.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-xl flex flex-col items-center justify-center text-center group transition">
+                            <div class="w-9 h-6 rounded bg-amber-500/20 border border-amber-400 flex items-center justify-center mb-1 group-hover:scale-110 transition">
+                                <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-amber-400"></i>
                             </div>
-                            <span class="text-xs text-slate-300 font-medium">Teacher Station</span>
-                            <span class="text-[10px] text-slate-500">1.5m × 0.8m</span>
+                            <span class="text-xs text-slate-300 font-medium">Teacher Desk</span>
+                            <span class="text-[10px] text-slate-500 font-mono">1.5m × 0.8m</span>
                         </button>
 
-                        <button data-add="smartboard" class="add-item-btn p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl flex flex-col items-center justify-center text-center group transition">
-                            <div class="w-12 h-4 rounded bg-indigo-500/20 border border-indigo-400 flex items-center justify-center mb-1 group-hover:scale-110 transition">
-                                <i data-lucide="monitor" class="w-3.5 h-3.5 text-indigo-400"></i>
+                        <button data-add="smartboard" class="add-item-btn p-2.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-xl flex flex-col items-center justify-center text-center group transition">
+                            <div class="w-10 h-3.5 rounded bg-indigo-500/20 border border-indigo-400 flex items-center justify-center mb-1 group-hover:scale-110 transition">
+                                <i data-lucide="monitor" class="w-3 h-3 text-indigo-400"></i>
                             </div>
-                            <span class="text-xs text-slate-300 font-medium">Smartboard / Board</span>
-                            <span class="text-[10px] text-slate-500">2.2m × 0.2m</span>
+                            <span class="text-xs text-slate-300 font-medium">Smartboard</span>
+                            <span class="text-[10px] text-slate-500 font-mono">2.2m × 0.25m</span>
                         </button>
 
-                        <button data-add="bookshelf" class="add-item-btn p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl flex flex-col items-center justify-center text-center group transition">
-                            <div class="w-10 h-5 rounded bg-purple-500/20 border border-purple-400 flex items-center justify-center mb-1 group-hover:scale-110 transition">
-                                <i data-lucide="book-open" class="w-3.5 h-3.5 text-purple-400"></i>
+                        <button data-add="bookshelf" class="add-item-btn p-2.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-xl flex flex-col items-center justify-center text-center group transition">
+                            <div class="w-9 h-4 rounded bg-purple-500/20 border border-purple-400 flex items-center justify-center mb-1 group-hover:scale-110 transition">
+                                <i data-lucide="book-open" class="w-3 h-3 text-purple-400"></i>
                             </div>
-                            <span class="text-xs text-slate-300 font-medium">Storage / Shelf</span>
-                            <span class="text-[10px] text-slate-500">1.2m × 0.4m</span>
+                            <span class="text-xs text-slate-300 font-medium">Bookshelf</span>
+                            <span class="text-[10px] text-slate-500 font-mono">1.2m × 0.4m</span>
                         </button>
 
-                        <button data-add="presentation-mat" class="add-item-btn p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl flex flex-col items-center justify-center text-center group transition">
-                            <div class="w-10 h-8 rounded bg-rose-500/20 border border-rose-400 flex items-center justify-center mb-1 group-hover:scale-110 transition">
-                                <i data-lucide="presentation" class="w-4 h-4 text-rose-400"></i>
+                        <button data-add="presentation-mat" class="add-item-btn p-2.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-xl flex flex-col items-center justify-center text-center group transition">
+                            <div class="w-9 h-7 rounded bg-rose-500/20 border border-rose-400 flex items-center justify-center mb-1 group-hover:scale-110 transition">
+                                <i data-lucide="presentation" class="w-3.5 h-3.5 text-rose-400"></i>
                             </div>
-                            <span class="text-xs text-slate-300 font-medium">Presentation Stage</span>
-                            <span class="text-[10px] text-slate-500">2.5m × 1.5m</span>
+                            <span class="text-xs text-slate-300 font-medium">Stage Zone</span>
+                            <span class="text-[10px] text-slate-500 font-mono">2.5m × 1.5m</span>
                         </button>
 
-                        <button data-add="door" class="add-item-btn p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl flex flex-col items-center justify-center text-center group transition">
-                            <div class="w-8 h-6 rounded bg-slate-600/40 border border-slate-400 flex items-center justify-center mb-1 group-hover:scale-110 transition">
-                                <i data-lucide="door-open" class="w-4 h-4 text-slate-300"></i>
+                        <button data-add="door" class="add-item-btn p-2.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-xl flex flex-col items-center justify-center text-center group transition">
+                            <div class="w-7 h-5 rounded bg-slate-600/40 border border-slate-400 flex items-center justify-center mb-1 group-hover:scale-110 transition">
+                                <i data-lucide="door-open" class="w-3.5 h-3.5 text-slate-300"></i>
                             </div>
-                            <span class="text-xs text-slate-300 font-medium">Door / Entrance</span>
-                            <span class="text-[10px] text-slate-500">1.0m × 0.2m</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- ITEM PROPERTIES INSPECTOR PANEL -->
-                <div id="inspectorPanel" class="p-4 bg-slate-800/90 rounded-xl border border-slate-700 space-y-3 hidden">
-                    <div class="flex items-center justify-between border-b border-slate-700 pb-2">
-                        <span class="text-xs font-bold text-emerald-400 flex items-center gap-1">
-                            <i data-lucide="sliders" class="w-3.5 h-3.5"></i> Item Properties
-                        </span>
-                        <span id="selectedItemType" class="text-[10px] font-mono text-slate-400">Single Desk</span>
-                    </div>
-
-                    <!-- Rotation Slider -->
-                    <div>
-                        <div class="flex justify-between text-xs text-slate-300 mb-1">
-                            <span>Rotation</span>
-                            <span id="rotateValDisplay" class="font-mono text-emerald-400">0°</span>
-                        </div>
-                        <input type="range" id="rotateSlider" min="0" max="345" step="15" value="0" class="w-full accent-emerald-500 bg-slate-900 rounded-lg cursor-pointer">
-                    </div>
-
-                    <!-- Label Input -->
-                    <div>
-                        <label class="text-xs text-slate-300 block mb-1">Custom Label / Group #</label>
-                        <input type="text" id="itemLabelInput" placeholder="e.g. Group 1" class="w-full bg-slate-900 border border-slate-700 text-xs px-2.5 py-1.5 rounded-lg text-slate-200 focus:outline-none focus:border-emerald-500">
-                    </div>
-
-                    <!-- Inspector Actions -->
-                    <div class="flex items-center justify-between gap-2 pt-2">
-                        <button id="duplicateItemBtn" class="flex-1 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-medium text-slate-200 flex items-center justify-center gap-1 transition">
-                            <i data-lucide="copy" class="w-3.5 h-3.5"></i> Duplicate
-                        </button>
-                        <button id="deleteItemBtn" class="py-1.5 px-3 bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/40 rounded-lg text-xs font-medium flex items-center justify-center gap-1 transition">
-                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            <span class="text-xs text-slate-300 font-medium">Doorway</span>
+                            <span class="text-[10px] text-slate-500 font-mono">1.0m × 0.2m</span>
                         </button>
                     </div>
                 </div>
@@ -312,149 +353,211 @@
             </div>
         </aside>
 
-        <!-- CENTER CANVAS CONTAINER -->
-        <section class="flex-1 bg-slate-950 relative flex flex-col justify-center items-center p-4 overflow-hidden">
-            <!-- Canvas HUD Info Overlay -->
-            <div class="absolute top-6 left-6 z-10 glass-panel px-3 py-1.5 rounded-lg flex items-center gap-3 text-xs text-slate-300 shadow-lg">
+        <!-- CENTER WORKSPACE & CANVAS -->
+        <section class="flex-1 bg-slate-950 relative flex flex-col justify-center items-center p-2 md:p-4 overflow-hidden min-h-[50vh] lg:min-h-0">
+            <!-- Canvas HUD Overlay -->
+            <div class="absolute top-3 left-3 md:top-5 md:left-5 z-10 glass-panel px-3 py-1.5 rounded-xl flex items-center gap-3 text-xs text-slate-300 shadow-xl">
                 <span class="flex items-center gap-1.5 font-medium">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Scale: 1 Meter = <span id="scaleMeterVal">50</span>px
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Grid Scale: 1m = <span id="scaleMeterVal">50</span>px
                 </span>
                 <span class="text-slate-600">|</span>
-                <span id="canvasDimLabel" class="font-mono text-slate-400">10m x 8m</span>
+                <span id="canvasDimLabel" class="font-mono text-slate-400">10.0m x 8.0m</span>
             </div>
 
-            <div class="absolute top-6 right-6 z-10 flex gap-2">
-                <button id="zoomInBtn" class="p-2 glass-panel hover:bg-slate-800 text-slate-300 rounded-lg shadow"><i data-lucide="zoom-in" class="w-4 h-4"></i></button>
-                <button id="zoomOutBtn" class="p-2 glass-panel hover:bg-slate-800 text-slate-300 rounded-lg shadow"><i data-lucide="zoom-out" class="w-4 h-4"></i></button>
+            <!-- Canvas Zoom Controls -->
+            <div class="absolute top-3 right-3 md:top-5 md:right-5 z-10 flex gap-2">
+                <button id="zoomInBtn" class="p-2 glass-panel hover:bg-slate-800 text-slate-300 rounded-xl shadow-lg"><i data-lucide="zoom-in" class="w-4 h-4"></i></button>
+                <button id="zoomOutBtn" class="p-2 glass-panel hover:bg-slate-800 text-slate-300 rounded-xl shadow-lg"><i data-lucide="zoom-out" class="w-4 h-4"></i></button>
             </div>
 
-            <!-- INTERACTIVE CANVAS -->
-            <div id="canvasWrapper" class="relative shadow-2xl rounded-xl overflow-hidden border border-slate-700/80 bg-slate-900 transition-all duration-300">
+            <!-- INTERACTIVE CANVAS CONTAINER -->
+            <div id="canvasWrapper" class="relative shadow-2xl rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 transition-all duration-300 max-w-full max-h-full">
                 <canvas id="classroomCanvas"></canvas>
             </div>
         </section>
 
+        <!-- RIGHT SIDEBAR: INSPECTOR & LIVE METRICS (DESKTOP) -->
+        <aside id="rightSidebar" class="w-full lg:w-80 glass-panel border-l border-slate-800 flex flex-col h-auto lg:h-[calc(100vh-60px)] z-20 shrink-0 hidden lg:flex">
+            <!-- Inspector / Selected Item Card -->
+            <div class="p-4 border-b border-slate-800 space-y-3">
+                <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i data-lucide="sliders" class="w-4 h-4"></i> Item Inspector
+                </h3>
+                
+                <div id="inspectorPanel" class="space-y-3 hidden">
+                    <div class="flex items-center justify-between">
+                        <span id="selectedItemType" class="text-xs font-semibold text-slate-200">Single Desk</span>
+                        <span class="text-[10px] font-mono bg-slate-800 px-2 py-0.5 rounded text-slate-400">Selected</span>
+                    </div>
+
+                    <!-- Rotation Slider -->
+                    <div>
+                        <div class="flex justify-between text-xs text-slate-300 mb-1">
+                            <span>Rotation Angle</span>
+                            <span id="rotateValDisplay" class="font-mono text-emerald-400">0°</span>
+                        </div>
+                        <input type="range" id="rotateSlider" min="0" max="345" step="15" value="0" class="w-full accent-emerald-500 bg-slate-900 rounded-lg cursor-pointer">
+                    </div>
+
+                    <!-- Custom Label Input -->
+                    <div>
+                        <label class="text-[11px] text-slate-400 block mb-1">Custom Label / Group #</label>
+                        <input type="text" id="itemLabelInput" placeholder="e.g. Group 1 Desk" class="w-full bg-slate-900 border border-slate-700 text-xs px-2.5 py-1.5 rounded-lg text-slate-200 focus:outline-none focus:border-emerald-500">
+                    </div>
+
+                    <!-- Action Controls -->
+                    <div class="flex items-center justify-between gap-2 pt-1">
+                        <button id="duplicateItemBtn" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-medium text-slate-200 flex items-center justify-center gap-1 transition">
+                            <i data-lucide="copy" class="w-3.5 h-3.5"></i> Duplicate
+                        </button>
+                        <button id="deleteItemBtn" class="py-1.5 px-3 bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/40 rounded-lg text-xs font-medium flex items-center justify-center gap-1 transition">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete
+                        </button>
+                    </div>
+                </div>
+
+                <div id="inspectorEmptyState" class="p-4 bg-slate-900/50 rounded-xl border border-slate-800 text-center">
+                    <i data-lucide="mouse-pointer-click" class="w-6 h-6 text-slate-600 mx-auto mb-1"></i>
+                    <p class="text-xs text-slate-500">Click any furniture item on the canvas to edit properties.</p>
+                </div>
+            </div>
+
+            <!-- Live Analytics Panel -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-4">
+                <h3 class="text-xs font-bold text-teal-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Live PAK-21 Analytics
+                </h3>
+
+                <!-- Metric 1: Capacity -->
+                <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 space-y-1">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-400 flex items-center gap-1"><i data-lucide="users" class="w-3.5 h-3.5 text-blue-400"></i> Capacity Utilization</span>
+                        <span class="font-bold text-slate-200"><span id="metricCapacityCurrent">0</span> / <span id="metricCapacityTarget">30</span></span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden mt-1">
+                        <div id="metricCapacityBar" class="bg-blue-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Metric 2: Collaboration Index -->
+                <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 space-y-1">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-400 flex items-center gap-1"><i data-lucide="share-2" class="w-3.5 h-3.5 text-emerald-400"></i> Collaboration Index</span>
+                        <span id="metricCollabVal" class="font-bold text-emerald-400">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden mt-1">
+                        <div id="metricCollabBar" class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Metric 3: Sightline Visibility -->
+                <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 space-y-1">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-400 flex items-center gap-1"><i data-lucide="eye" class="w-3.5 h-3.5 text-teal-400"></i> Teacher Sightline</span>
+                        <span id="metricVisibilityVal" class="font-bold text-teal-400">95%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden mt-1">
+                        <div id="metricVisibilityBar" class="bg-teal-500 h-full rounded-full transition-all duration-300" style="width: 95%"></div>
+                    </div>
+                </div>
+
+                <!-- Metric 4: Pathway Traffic Clearance -->
+                <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 space-y-1">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-400 flex items-center gap-1"><i data-lucide="footprints" class="w-3.5 h-3.5 text-amber-400"></i> Pathway Clearance</span>
+                        <span id="metricPathwayVal" class="font-bold text-amber-400">85%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden mt-1">
+                        <div id="metricPathwayBar" class="bg-amber-500 h-full rounded-full transition-all duration-300" style="width: 85%"></div>
+                    </div>
+                </div>
+            </div>
+        </aside>
     </main>
 
-    <!-- ANALYTICS & METRICS DASHBOARD FOOTER -->
-    <footer class="glass-panel border-t border-slate-700/50 py-3 px-6 z-20 grid grid-cols-2 md:grid-cols-4 gap-4 items-center">
-        <!-- Metric 1: Capacity -->
-        <div class="flex items-center space-x-3 bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
-            <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                <i data-lucide="users" class="w-5 h-5"></i>
-            </div>
-            <div>
-                <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Student Capacity</div>
-                <div class="flex items-baseline space-x-1">
-                    <span id="metricCapacityCurrent" class="text-lg font-bold text-slate-100">0</span>
-                    <span class="text-xs text-slate-400">/ <span id="metricCapacityTarget">30</span> seats</span>
-                </div>
-            </div>
-        </div>
+    <!-- MOBILE FLOATING QUICK ACTION BUTTONS -->
+    <div class="lg:hidden fixed bottom-16 right-4 z-30 flex flex-col gap-2">
+        <button id="mobileOpen3dBtn" class="p-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full shadow-xl flex items-center justify-center">
+            <i data-lucide="box" class="w-5 h-5"></i>
+        </button>
+        <button id="mobileGenerateAiReportBtn" class="p-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-full shadow-xl flex items-center justify-center">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+        </button>
+    </div>
 
-        <!-- Metric 2: Collaboration Index -->
-        <div class="flex items-center space-x-3 bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
-            <div class="p-2 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                <i data-lucide="share-2" class="w-5 h-5"></i>
-            </div>
-            <div class="flex-1">
-                <div class="flex justify-between text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                    <span>PAK-21 Collab Index</span>
-                    <span id="metricCollabVal" class="text-blue-400 font-bold">85%</span>
-                </div>
-                <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                    <div id="metricCollabBar" class="bg-blue-500 h-full rounded-full transition-all duration-500" style="width: 85%;"></div>
-                </div>
-            </div>
-        </div>
+    <!-- MOBILE BOTTOM NAVIGATION TAB BAR -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 border-t border-slate-800 px-2 py-2 flex justify-around items-center glass-panel">
+        <button id="mobNavPresets" class="flex flex-col items-center text-emerald-400">
+            <i data-lucide="layout-template" class="w-4 h-4"></i>
+            <span class="text-[10px] mt-0.5">Presets</span>
+        </button>
+        <button id="mobNavPalette" class="flex flex-col items-center text-slate-400">
+            <i data-lucide="armchair" class="w-4 h-4"></i>
+            <span class="text-[10px] mt-0.5">Add Item</span>
+        </button>
+        <button id="mobNavInspector" class="flex flex-col items-center text-slate-400">
+            <i data-lucide="sliders" class="w-4 h-4"></i>
+            <span class="text-[10px] mt-0.5">Edit</span>
+        </button>
+        <button id="mobNavMetrics" class="flex flex-col items-center text-slate-400">
+            <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+            <span class="text-[10px] mt-0.5">Stats</span>
+        </button>
+    </nav>
 
-        <!-- Metric 3: Teacher Sightline Visibility -->
-        <div class="flex items-center space-x-3 bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
-            <div class="p-2 rounded-lg bg-teal-500/10 text-teal-400 border border-teal-500/20">
-                <i data-lucide="eye" class="w-5 h-5"></i>
-            </div>
-            <div class="flex-1">
-                <div class="flex justify-between text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                    <span>Teacher Visibility</span>
-                    <span id="metricVisibilityVal" class="text-teal-400 font-bold">92%</span>
-                </div>
-                <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                    <div id="metricVisibilityBar" class="bg-teal-500 h-full rounded-full transition-all duration-500" style="width: 92%;"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Metric 4: Pathway Clearance -->
-        <div class="flex items-center space-x-3 bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
-            <div class="p-2 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                <i data-lucide="footprints" class="w-5 h-5"></i>
-            </div>
-            <div class="flex-1">
-                <div class="flex justify-between text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                    <span>Aisle Pathway Flow</span>
-                    <span id="metricPathwayVal" class="text-amber-400 font-bold">78%</span>
-                </div>
-                <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                    <div id="metricPathwayBar" class="bg-amber-500 h-full rounded-full transition-all duration-500" style="width: 78%;"></div>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- 3D PERSPECTIVE MODAL -->
-    <div id="modal3d" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex flex-col justify-between items-center p-4">
-        <!-- Modal Top Control Bar -->
-        <div class="w-full max-w-6xl flex justify-between items-center glass-panel px-4 py-3 rounded-xl z-10">
-            <div class="flex items-center space-x-2">
-                <i data-lucide="box" class="w-5 h-5 text-indigo-400"></i>
-                <h2 class="font-bold text-slate-100">3D Interactive Classroom Perspective</h2>
-            </div>
+    <!-- THREE.JS 3D SPATIAL ORBIT MODAL -->
+    <div id="modal3d" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex flex-col items-center justify-center p-2 md:p-6">
+        <div class="w-full max-w-6xl glass-panel rounded-2xl border border-slate-800 p-4 flex justify-between items-center z-10">
             <div class="flex items-center space-x-3">
-                <span class="text-xs text-slate-400 hidden sm:inline">Drag to Orbit | Scroll to Zoom</span>
-                <button id="close3dBtn" class="p-1.5 bg-slate-800 hover:bg-rose-600/30 text-slate-300 hover:text-rose-400 border border-slate-700 rounded-lg transition">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
+                <div class="p-2 bg-indigo-500/20 text-indigo-400 rounded-xl"><i data-lucide="box" class="w-5 h-5"></i></div>
+                <div>
+                    <h2 class="text-sm md:text-base font-bold text-white">3D Spatial Room Simulation</h2>
+                    <p class="text-[10px] md:text-xs text-indigo-300">Orbit controls enabled. Drag to rotate, pinch/scroll to zoom.</p>
+                </div>
             </div>
+            <button id="close3dBtn" class="p-2 bg-slate-800 hover:bg-rose-600/30 text-slate-300 hover:text-rose-400 border border-slate-700 rounded-xl transition">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
         </div>
 
-        <!-- 3D WebGL Canvas Container -->
-        <div id="container3d" class="w-full max-w-6xl flex-1 my-3 rounded-2xl overflow-hidden border border-slate-700/80 shadow-2xl relative">
-            <div id="loading3d" class="absolute inset-0 flex items-center justify-center bg-slate-900 text-slate-300 font-medium text-sm">
-                <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-emerald-400 mr-2"></i> Rendering 3D Scene...
+        <!-- 3D Canvas Viewport -->
+        <div id="container3d" class="w-full max-w-6xl flex-1 my-3 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl relative">
+            <div id="loading3d" class="absolute inset-0 flex items-center justify-center bg-slate-900 text-slate-300 font-medium text-xs">
+                <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-emerald-400 mr-2"></i> Rendering 3D Scene Mesh...
             </div>
         </div>
     </div>
 
-    <!-- AI AUDIT & DIAGNOSTIC REPORT MODAL -->
-    <div id="modalAiReport" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto">
-        <div class="glass-panel w-full max-w-3xl rounded-2xl border border-slate-700 shadow-2xl overflow-hidden flex flex-col my-8 max-h-[90vh]">
-            <!-- Header -->
-            <div class="bg-gradient-to-r from-emerald-900/40 via-teal-900/30 to-slate-900 p-6 border-b border-slate-700/80 flex items-center justify-between">
+    <!-- AI PAK-21 DIAGNOSTIC AUDIT REPORT MODAL -->
+    <div id="modalAiReport" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-3 md:p-6 overflow-y-auto">
+        <div class="glass-panel w-full max-w-3xl rounded-2xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col my-auto max-h-[90vh]">
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-emerald-900/40 via-teal-900/30 to-slate-900 p-5 border-b border-slate-800 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <div class="p-2.5 bg-emerald-500/20 border border-emerald-500/40 rounded-xl">
                         <i data-lucide="sparkles" class="w-6 h-6 text-emerald-400"></i>
                     </div>
                     <div>
-                        <h2 class="text-lg font-bold text-white">PAK-21 Pedagogical Diagnostic Report</h2>
+                        <h2 class="text-base md:text-lg font-bold text-white">PAK-21 Pedagogical Audit & Diagnostic Report</h2>
                         <p class="text-xs text-emerald-300">Automated Spatial Efficiency & Active Learning Evaluation</p>
                     </div>
                 </div>
-                <button id="closeAiReportBtn" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition">
+                <button id="closeAiReportBtn" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
 
-            <!-- Report Body Content -->
-            <div id="reportContent" class="p-6 space-y-6 overflow-y-auto text-slate-200 text-sm">
-                <!-- Dynamic report content injected via JS -->
+            <!-- Modal Dynamic Content -->
+            <div id="reportContent" class="p-5 md:p-6 space-y-6 overflow-y-auto text-slate-200 text-xs md:text-sm">
+                <!-- Content injected via JavaScript -->
             </div>
 
-            <!-- Modal Footer Actions -->
-            <div class="bg-slate-900/80 px-6 py-4 border-t border-slate-800 flex justify-between items-center">
-                <span class="text-xs text-slate-400">Standard Malaysian PAK-21 Guidelines Matrix</span>
+            <!-- Modal Footer -->
+            <div class="bg-slate-900/90 px-6 py-4 border-t border-slate-800 flex justify-between items-center no-print">
+                <span class="text-[11px] text-slate-500 hidden sm:inline">Based on Malaysian Ministry of Education PAK-21 Directives</span>
                 <div class="flex space-x-3">
                     <button id="printReportBtn" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs rounded-xl flex items-center gap-2 border border-slate-700 transition">
-                        <i data-lucide="printer" class="w-4 h-4"></i> Print Summary
+                        <i data-lucide="printer" class="w-4 h-4"></i> Print Report
                     </button>
                     <button id="closeReportBtn" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-emerald-600/20 transition">
                         Done
@@ -464,7 +567,7 @@
         </div>
     </div>
 
-    <!-- MAIN SCRIPT -->
+    <!-- APPLICATION CONTROLLER SCRIPT -->
     <script>
         /* ==========================================================================
            GLOBAL APP STATE & CONFIGURATION
@@ -481,16 +584,15 @@
             selectedItemId: null,
             isDragging: false,
             dragOffset: { x: 0, y: 0 },
-            zoomLevel: 1.0,
-            theme: 'dark'
+            zoomLevel: 1.0
         };
 
-        // Item Template Definitions
+        // Furniture Metadata Catalog
         const ITEM_TYPES = {
             'single-desk': { width: 0.7, height: 0.6, color: '#3b82f6', label: 'Single Desk', capacity: 1, shape: 'rect' },
             'double-desk': { width: 1.3, height: 0.6, color: '#06b6d4', label: 'Double Desk', capacity: 2, shape: 'rect' },
-            'round-table': { width: 1.4, height: 1.4, color: '#0ea5e9', label: 'Round Cluster', capacity: 4, shape: 'circle' },
-            'teacher-desk': { width: 1.5, height: 0.8, color: '#f59e0b', label: 'Teacher Station', capacity: 0, shape: 'rect' },
+            'round-table': { width: 1.4, height: 1.4, color: '#0ea5e9', label: 'Round Pod', capacity: 4, shape: 'circle' },
+            'teacher-desk': { width: 1.5, height: 0.8, color: '#f59e0b', label: 'Teacher Desk', capacity: 0, shape: 'rect' },
             'smartboard': { width: 2.2, height: 0.25, color: '#6366f1', label: 'Smartboard', capacity: 0, shape: 'rect' },
             'bookshelf': { width: 1.2, height: 0.4, color: '#a855f7', label: 'Bookshelf', capacity: 0, shape: 'rect' },
             'presentation-mat': { width: 2.5, height: 1.5, color: '#f43f5e', label: 'Stage Zone', capacity: 0, shape: 'rect' },
@@ -501,17 +603,14 @@
         let threeRenderer, threeScene, threeCamera, threeControls;
 
         /* ==========================================================================
-           INITIALIZATION & EVENT LISTENERS
+           INITIALIZATION & EVENT BINDING
            ========================================================================== */
-        window.onload = function() {
-            lucide.createIcons();
+        window.addEventListener('DOMContentLoaded', () => {
             initCanvas();
             bindEvents();
-            loadPreset('kumpulan'); // Load default PAK-21 layout
-            updateCanvasSize();
-            renderCanvas();
-            updateMetrics();
-        };
+            loadPreset('kumpulan'); // Default layout
+            lucide.createIcons();
+        });
 
         function initCanvas() {
             canvas = document.getElementById('classroomCanvas');
@@ -520,173 +619,186 @@
         }
 
         function updateCanvasSize() {
-            state.roomLengthMeters = parseFloat(document.getElementById('roomLength').value) || 10;
-            state.roomWidthMeters = parseFloat(document.getElementById('roomWidth').value) || 8;
-            state.targetStudents = parseInt(document.getElementById('targetStudents').value) || 30;
+            const lengthInput = document.getElementById('roomLength').value || 10;
+            const widthInput = document.getElementById('roomWidth').value || 8;
 
-            const pixelWidth = state.roomLengthMeters * state.scale * state.zoomLevel;
-            const pixelHeight = state.roomWidthMeters * state.scale * state.zoomLevel;
+            state.roomLengthMeters = parseFloat(lengthInput);
+            state.roomWidthMeters = parseFloat(widthInput);
 
-            canvas.width = pixelWidth;
-            canvas.height = pixelHeight;
+            canvas.width = state.roomLengthMeters * state.scale * state.zoomLevel;
+            canvas.height = state.roomWidthMeters * state.scale * state.zoomLevel;
 
-            const wrapper = document.getElementById('canvasWrapper');
-            wrapper.style.width = `${pixelWidth}px`;
-            wrapper.style.height = `${pixelHeight}px`;
-
-            document.getElementById('canvasDimLabel').innerText = `${state.roomLengthMeters}m x ${state.roomWidthMeters}m`;
-            document.getElementById('scaleMeterVal').innerText = Math.round(state.scale * state.zoomLevel);
-
+            document.getElementById('canvasDimLabel').innerText = `${state.roomLengthMeters.toFixed(1)}m x ${state.roomWidthMeters.toFixed(1)}m`;
             renderCanvas();
-            updateMetrics();
         }
 
         function bindEvents() {
-            // Inputs
-            document.getElementById('roomLength').addEventListener('change', updateCanvasSize);
-            document.getElementById('roomWidth').addEventListener('change', updateCanvasSize);
-            document.getElementById('targetStudents').addEventListener('change', () => {
-                state.targetStudents = parseInt(document.getElementById('targetStudents').value) || 30;
+            // Inputs & Controls
+            document.getElementById('roomLength')?.addEventListener('change', updateCanvasSize);
+            document.getElementById('roomWidth')?.addEventListener('change', updateCanvasSize);
+            document.getElementById('targetStudents')?.addEventListener('change', (e) => {
+                state.targetStudents = parseInt(e.target.value) || 30;
                 updateMetrics();
             });
 
-            // Tabs
-            document.getElementById('tabPresets').addEventListener('click', () => switchTab('presets'));
-            document.getElementById('tabPalette').addEventListener('click', () => switchTab('palette'));
+            // Toggles
+            document.getElementById('toggleSightlinesBtn')?.addEventListener('click', () => {
+                state.showSightlines = !state.showSightlines;
+                renderCanvas();
+            });
+            document.getElementById('toggleFlowBtn')?.addEventListener('click', () => {
+                state.showFlow = !state.showFlow;
+                renderCanvas();
+            });
+            document.getElementById('toggleGridBtn')?.addEventListener('click', () => {
+                state.gridSnap = !state.gridSnap;
+            });
 
-            // Presets
+            // Canvas Zooming
+            document.getElementById('zoomInBtn')?.addEventListener('click', () => {
+                state.zoomLevel = Math.min(1.8, state.zoomLevel + 0.1);
+                updateCanvasSize();
+            });
+            document.getElementById('zoomOutBtn')?.addEventListener('click', () => {
+                state.zoomLevel = Math.max(0.6, state.zoomLevel - 0.1);
+                updateCanvasSize();
+            });
+
+            // Presets & Palette Buttons
             document.querySelectorAll('.preset-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const preset = btn.getAttribute('data-preset');
+                btn.addEventListener('click', (e) => {
+                    const preset = e.currentTarget.getAttribute('data-preset');
                     loadPreset(preset);
                 });
             });
 
-            // Add Item Palette
             document.querySelectorAll('.add-item-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const type = btn.getAttribute('data-add');
-                    addItemToCanvas(type);
+                btn.addEventListener('click', (e) => {
+                    const itemType = e.currentTarget.getAttribute('data-add');
+                    addItemToCanvas(itemType);
                 });
             });
 
-            // Canvas Interaction
+            // Canvas Mouse & Touch Events
             canvas.addEventListener('mousedown', handleCanvasMouseDown);
             canvas.addEventListener('mousemove', handleCanvasMouseMove);
-            canvas.addEventListener('mouseup', handleCanvasMouseUp);
+            window.addEventListener('mouseup', handleCanvasMouseUp);
 
-            // Touch support
-            canvas.addEventListener('touchstart', handleTouchStart);
-            canvas.addEventListener('touchmove', handleTouchMove);
-            canvas.addEventListener('touchend', handleCanvasMouseUp);
+            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+            window.addEventListener('touchend', handleCanvasMouseUp);
 
-            // Controls & Toggles
-            document.getElementById('toggleSightlinesBtn').addEventListener('click', (e) => {
-                state.showSightlines = !state.showSightlines;
-                e.currentTarget.classList.toggle('bg-emerald-600/30');
-                renderCanvas();
+            // Item Inspector Events
+            document.getElementById('rotateSlider')?.addEventListener('input', (e) => {
+                if (state.selectedItemId === null) return;
+                const item = state.items.find(i => i.id === state.selectedItemId);
+                if (item) {
+                    item.rotation = parseInt(e.target.value);
+                    document.getElementById('rotateValDisplay').innerText = `${item.rotation}°`;
+                    renderCanvas();
+                }
             });
 
-            document.getElementById('toggleFlowBtn').addEventListener('click', (e) => {
-                state.showFlow = !state.showFlow;
-                e.currentTarget.classList.toggle('bg-teal-600/30');
-                renderCanvas();
+            document.getElementById('itemLabelInput')?.addEventListener('input', (e) => {
+                if (state.selectedItemId === null) return;
+                const item = state.items.find(i => i.id === state.selectedItemId);
+                if (item) {
+                    item.customLabel = e.target.value;
+                    renderCanvas();
+                }
             });
 
-            document.getElementById('toggleGridBtn').addEventListener('click', (e) => {
-                state.gridSnap = !state.gridSnap;
-                e.currentTarget.classList.toggle('bg-indigo-600/30');
-            });
-
-            document.getElementById('resetCanvasBtn').addEventListener('click', () => {
+            document.getElementById('duplicateItemBtn')?.addEventListener('click', duplicateSelectedItem);
+            document.getElementById('deleteItemBtn')?.addEventListener('click', deleteSelectedItem);
+            document.getElementById('resetCanvasBtn')?.addEventListener('click', () => {
                 state.items = [];
                 state.selectedItemId = null;
                 hideInspector();
                 renderCanvas();
                 updateMetrics();
             });
+            document.getElementById('exportImgBtn')?.addEventListener('click', exportCanvasImage);
 
-            document.getElementById('exportImgBtn').addEventListener('click', exportCanvasImage);
+            // Modals
+            document.getElementById('open3dBtn')?.addEventListener('click', open3DModal);
+            document.getElementById('close3dBtn')?.addEventListener('click', close3DModal);
+            document.getElementById('mobileOpen3dBtn')?.addEventListener('click', open3DModal);
 
-            // Zoom
-            document.getElementById('zoomInBtn').addEventListener('click', () => {
-                state.zoomLevel = Math.min(1.8, state.zoomLevel + 0.1);
-                updateCanvasSize();
-            });
-            document.getElementById('zoomOutBtn').addEventListener('click', () => {
-                state.zoomLevel = Math.max(0.6, state.zoomLevel - 0.1);
-                updateCanvasSize();
-            });
-
-            // Inspector Controls
-            document.getElementById('rotateSlider').addEventListener('input', (e) => {
-                const val = parseInt(e.target.value);
-                document.getElementById('rotateValDisplay').innerText = `${val}°`;
-                if (state.selectedItemId !== null) {
-                    const item = state.items.find(i => i.id === state.selectedItemId);
-                    if (item) {
-                        item.rotation = val;
-                        renderCanvas();
-                    }
-                }
-            });
-
-            document.getElementById('itemLabelInput').addEventListener('input', (e) => {
-                if (state.selectedItemId !== null) {
-                    const item = state.items.find(i => i.id === state.selectedItemId);
-                    if (item) {
-                        item.customLabel = e.target.value;
-                        renderCanvas();
-                    }
-                }
-            });
-
-            document.getElementById('duplicateItemBtn').addEventListener('click', duplicateSelectedItem);
-            document.getElementById('deleteItemBtn').addEventListener('click', deleteSelectedItem);
+            document.getElementById('generateAiReportBtn')?.addEventListener('click', generateAiReport);
+            document.getElementById('mobileGenerateAiReportBtn')?.addEventListener('click', generateAiReport);
+            document.getElementById('closeAiReportBtn')?.addEventListener('click', () => document.getElementById('modalAiReport').classList.add('hidden'));
+            document.getElementById('closeReportBtn')?.addEventListener('click', () => document.getElementById('modalAiReport').classList.add('hidden'));
+            document.getElementById('printReportBtn')?.addEventListener('click', () => window.print());
 
             // Theme Toggle
-            document.getElementById('themeToggleBtn').addEventListener('click', () => {
+            document.getElementById('themeToggleBtn')?.addEventListener('click', () => {
                 document.documentElement.classList.toggle('dark');
-                document.documentElement.classList.toggle('light');
                 renderCanvas();
             });
 
-            // 3D Modal
-            document.getElementById('open3dBtn').addEventListener('click', open3DModal);
-            document.getElementById('close3dBtn').addEventListener('click', close3DModal);
+            // Sidebar Tabs (Desktop/Mobile)
+            document.getElementById('tabPresets')?.addEventListener('click', () => switchSidebarTab('presets'));
+            document.getElementById('tabPalette')?.addEventListener('click', () => switchSidebarTab('palette'));
 
-            // AI Report Modal
-            document.getElementById('generateAiReportBtn').addEventListener('click', generateAiReport);
-            document.getElementById('closeAiReportBtn').addEventListener('click', () => {
-                document.getElementById('modalAiReport').classList.add('hidden');
-            });
-            document.getElementById('closeReportBtn').addEventListener('click', () => {
-                document.getElementById('modalAiReport').classList.add('hidden');
-            });
-            document.getElementById('printReportBtn').addEventListener('click', () => window.print());
+            // Mobile Navigation Toggle
+            bindMobileNav();
         }
 
-        function switchTab(tab) {
+        function switchSidebarTab(tab) {
             const tabP = document.getElementById('tabPresets');
             const tabF = document.getElementById('tabPalette');
             const panelP = document.getElementById('panelPresets');
             const panelF = document.getElementById('panelPalette');
 
+            panelP.classList.add('hidden');
+            panelF.classList.add('hidden');
+
             if (tab === 'presets') {
-                tabP.className = "flex-1 py-2.5 text-xs font-semibold text-emerald-400 border-b-2 border-emerald-500 flex items-center justify-center gap-1.5";
-                tabF.className = "flex-1 py-2.5 text-xs font-semibold text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5";
+                tabP.className = "flex-1 py-3 text-xs font-semibold text-emerald-400 border-b-2 border-emerald-500 flex items-center justify-center gap-1.5";
+                tabF.className = "flex-1 py-3 text-xs font-semibold text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5";
                 panelP.classList.remove('hidden');
-                panelF.classList.add('hidden');
             } else {
-                tabF.className = "flex-1 py-2.5 text-xs font-semibold text-emerald-400 border-b-2 border-emerald-500 flex items-center justify-center gap-1.5";
-                tabP.className = "flex-1 py-2.5 text-xs font-semibold text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5";
+                tabF.className = "flex-1 py-3 text-xs font-semibold text-emerald-400 border-b-2 border-emerald-500 flex items-center justify-center gap-1.5";
+                tabP.className = "flex-1 py-3 text-xs font-semibold text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5";
                 panelF.classList.remove('hidden');
-                panelP.classList.add('hidden');
             }
         }
 
+        function bindMobileNav() {
+            const leftSidebar = document.getElementById('leftSidebar');
+            const rightSidebar = document.getElementById('rightSidebar');
+            const mobSettingsDrawer = document.getElementById('mobileSettingsDrawer');
+
+            document.getElementById('mobileSettingsToggleBtn')?.addEventListener('click', () => {
+                mobSettingsDrawer.classList.toggle('hidden');
+                mobSettingsDrawer.classList.toggle('flex');
+            });
+
+            document.getElementById('mobNavPresets')?.addEventListener('click', () => {
+                leftSidebar.classList.remove('hidden');
+                rightSidebar.classList.add('hidden');
+                switchSidebarTab('presets');
+            });
+
+            document.getElementById('mobNavPalette')?.addEventListener('click', () => {
+                leftSidebar.classList.remove('hidden');
+                rightSidebar.classList.add('hidden');
+                switchSidebarTab('palette');
+            });
+
+            document.getElementById('mobNavInspector')?.addEventListener('click', () => {
+                leftSidebar.classList.add('hidden');
+                rightSidebar.classList.remove('hidden');
+            });
+
+            document.getElementById('mobNavMetrics')?.addEventListener('click', () => {
+                leftSidebar.classList.add('hidden');
+                rightSidebar.classList.remove('hidden');
+            });
+        }
+
         /* ==========================================================================
-           PAK-21 PRESET LAYOUT GENERATORS
+           PAK-21 PRESET LAYOUT ENGINE
            ========================================================================== */
         function loadPreset(presetName) {
             state.items = [];
@@ -696,171 +808,47 @@
             const L = state.roomLengthMeters;
             const W = state.roomWidthMeters;
 
-            // 1. Always place Front Board & Teacher Desk
-            state.items.push({
-                id: Date.now() + 1,
-                type: 'smartboard',
-                x: L / 2 - 1.1,
-                y: 0.3,
-                rotation: 0,
-                customLabel: 'Front Smartboard'
-            });
+            // Anchor Items
+            state.items.push({ id: Date.now() + 1, type: 'smartboard', x: L / 2 - 1.1, y: 0.3, rotation: 0, customLabel: 'Front Smartboard' });
+            state.items.push({ id: Date.now() + 2, type: 'teacher-desk', x: L / 2 - 0.75, y: 1.2, rotation: 0, customLabel: 'Teacher Desk' });
+            state.items.push({ id: Date.now() + 3, type: 'door', x: 0.2, y: W - 0.5, rotation: 0, customLabel: 'Main Entrance' });
+            state.items.push({ id: Date.now() + 4, type: 'bookshelf', x: L - 1.5, y: 0.3, rotation: 0, customLabel: 'Resource Shelf' });
 
-            state.items.push({
-                id: Date.now() + 2,
-                type: 'teacher-desk',
-                x: L / 2 - 0.75,
-                y: 1.2,
-                rotation: 0,
-                customLabel: 'Teacher Desk'
-            });
-
-            // 2. Doorway & Storage
-            state.items.push({
-                id: Date.now() + 3,
-                type: 'door',
-                x: 0.2,
-                y: W - 0.5,
-                rotation: 0,
-                customLabel: 'Main Entrance'
-            });
-
-            state.items.push({
-                id: Date.now() + 4,
-                type: 'bookshelf',
-                x: L - 1.5,
-                y: 0.3,
-                rotation: 0,
-                customLabel: 'PAK-21 Resource Corner'
-            });
-
-            // 3. Layout Specific Student Seating
             if (presetName === 'kumpulan') {
-                // Group Clusters (6 Clusters of double desks)
                 const clusterPositions = [
-                    { x: 2.0, y: 2.8 }, { x: 5.5, y: 2.8 }, { x: 8.0, y: 2.8 },
-                    { x: 2.0, y: 5.5 }, { x: 5.5, y: 5.5 }, { x: 8.0, y: 5.5 }
+                    { x: 1.8, y: 2.8 }, { x: 5.2, y: 2.8 }, { x: 7.8, y: 2.8 },
+                    { x: 1.8, y: 5.4 }, { x: 5.2, y: 5.4 }, { x: 7.8, y: 5.4 }
                 ];
                 let groupNum = 1;
                 clusterPositions.forEach(pos => {
                     if (pos.x + 1.5 < L && pos.y + 1.5 < W) {
-                        // Create 4-seat cluster using 2 double desks facing each other
-                        state.items.push({
-                            id: Date.now() + Math.random(),
-                            type: 'double-desk',
-                            x: pos.x,
-                            y: pos.y,
-                            rotation: 0,
-                            customLabel: `Kumpulan ${groupNum}`
-                        });
-                        state.items.push({
-                            id: Date.now() + Math.random(),
-                            type: 'double-desk',
-                            x: pos.x,
-                            y: pos.y + 0.7,
-                            rotation: 180,
-                            customLabel: `Kumpulan ${groupNum}`
-                        });
+                        state.items.push({ id: Date.now() + Math.random(), type: 'double-desk', x: pos.x, y: pos.y, rotation: 0, customLabel: `Group ${groupNum}` });
+                        state.items.push({ id: Date.now() + Math.random(), type: 'double-desk', x: pos.x, y: pos.y + 0.7, rotation: 180, customLabel: `Group ${groupNum}` });
                         groupNum++;
                     }
                 });
-
             } else if (presetName === 'horseshoe') {
-                // U-Shape arrangement around central presentation space
-                state.items.push({
-                    id: Date.now() + 5,
-                    type: 'presentation-mat',
-                    x: L / 2 - 1.25,
-                    y: 3.5,
-                    rotation: 0,
-                    customLabel: 'Presentation Area'
-                });
-
-                // Left wing
-                for (let i = 0; i < 4; i++) {
-                    state.items.push({
-                        id: Date.now() + Math.random(),
-                        type: 'double-desk',
-                        x: 1.5,
-                        y: 2.5 + i * 1.1,
-                        rotation: 90,
-                        customLabel: 'U-Wing L'
-                    });
-                }
-                // Right wing
-                for (let i = 0; i < 4; i++) {
-                    state.items.push({
-                        id: Date.now() + Math.random(),
-                        type: 'double-desk',
-                        x: L - 2.0,
-                        y: 2.5 + i * 1.1,
-                        rotation: 270,
-                        customLabel: 'U-Wing R'
-                    });
-                }
-                // Bottom base
-                for (let i = 0; i < 3; i++) {
-                    state.items.push({
-                        id: Date.now() + Math.random(),
-                        type: 'double-desk',
-                        x: 2.8 + i * 1.5,
-                        y: W - 1.5,
-                        rotation: 0,
-                        customLabel: 'U-Base'
-                    });
-                }
-
+                state.items.push({ id: Date.now() + 5, type: 'presentation-mat', x: L / 2 - 1.25, y: 3.5, rotation: 0, customLabel: 'Stage Zone' });
+                for (let i = 0; i < 4; i++) state.items.push({ id: Date.now() + Math.random(), type: 'double-desk', x: 1.5, y: 2.5 + i * 1.1, rotation: 90, customLabel: 'U-Wing L' });
+                for (let i = 0; i < 4; i++) state.items.push({ id: Date.now() + Math.random(), type: 'double-desk', x: L - 2.0, y: 2.5 + i * 1.1, rotation: 270, customLabel: 'U-Wing R' });
+                for (let i = 0; i < 3; i++) state.items.push({ id: Date.now() + Math.random(), type: 'double-desk', x: 2.8 + i * 1.5, y: W - 1.4, rotation: 0, customLabel: 'U-Base' });
             } else if (presetName === 'stadium') {
-                // Angled rows facing teacher
-                const rows = 3;
-                for (let r = 0; r < rows; r++) {
+                for (let r = 0; r < 3; r++) {
                     const rowY = 2.8 + r * 1.4;
-                    state.items.push({
-                        id: Date.now() + Math.random(),
-                        type: 'double-desk',
-                        x: 1.5,
-                        y: rowY,
-                        rotation: 15,
-                        customLabel: `Row ${r+1}`
-                    });
-                    state.items.push({
-                        id: Date.now() + Math.random(),
-                        type: 'double-desk',
-                        x: L / 2 - 0.65,
-                        y: rowY,
-                        rotation: 0,
-                        customLabel: `Row ${r+1}`
-                    });
-                    state.items.push({
-                        id: Date.now() + Math.random(),
-                        type: 'double-desk',
-                        x: L - 2.8,
-                        y: rowY,
-                        rotation: 345,
-                        customLabel: `Row ${r+1}`
-                    });
+                    state.items.push({ id: Date.now() + Math.random(), type: 'double-desk', x: 1.5, y: rowY, rotation: 15, customLabel: `Row ${r+1}` });
+                    state.items.push({ id: Date.now() + Math.random(), type: 'double-desk', x: L / 2 - 0.65, y: rowY, rotation: 0, customLabel: `Row ${r+1}` });
+                    state.items.push({ id: Date.now() + Math.random(), type: 'double-desk', x: L - 2.8, y: rowY, rotation: 345, customLabel: `Row ${r+1}` });
                 }
-
             } else if (presetName === 'modular') {
-                // Round tables and mixed stations
                 state.items.push({ id: Date.now() + Math.random(), type: 'round-table', x: 2.0, y: 3.0, rotation: 0, customLabel: 'Station A' });
                 state.items.push({ id: Date.now() + Math.random(), type: 'round-table', x: L - 3.4, y: 3.0, rotation: 0, customLabel: 'Station B' });
                 state.items.push({ id: Date.now() + Math.random(), type: 'round-table', x: 2.0, y: 5.5, rotation: 0, customLabel: 'Station C' });
                 state.items.push({ id: Date.now() + Math.random(), type: 'round-table', x: L - 3.4, y: 5.5, rotation: 0, customLabel: 'Station D' });
-                state.items.push({ id: Date.now() + Math.random(), type: 'presentation-mat', x: L / 2 - 1.25, y: 4.0, rotation: 0, customLabel: 'Discussion Corner' });
-
+                state.items.push({ id: Date.now() + Math.random(), type: 'presentation-mat', x: L / 2 - 1.25, y: 4.0, rotation: 0, customLabel: 'Discussion Area' });
             } else if (presetName === 'traditional') {
-                // Grid of single/double desks
                 for (let r = 0; r < 4; r++) {
                     for (let c = 0; c < 4; c++) {
-                        state.items.push({
-                            id: Date.now() + Math.random(),
-                            type: 'double-desk',
-                            x: 1.5 + c * 1.8,
-                            y: 2.6 + r * 1.2,
-                            rotation: 0,
-                            customLabel: `Row ${r+1}`
-                        });
+                        state.items.push({ id: Date.now() + Math.random(), type: 'double-desk', x: 1.5 + c * 1.8, y: 2.6 + r * 1.2, rotation: 0, customLabel: `Row ${r+1}` });
                     }
                 }
             }
@@ -870,19 +858,17 @@
         }
 
         /* ==========================================================================
-           CANVAS RENDERING ENGINE (2D)
+           2D CANVAS DRAWING ENGINE
            ========================================================================== */
         function renderCanvas() {
             if (!ctx) return;
-
             const isDark = document.documentElement.classList.contains('dark');
             const scale = state.scale * state.zoomLevel;
 
-            // Clear Canvas
-            ctx.fillStyle = isDark ? '#0f172a' : '#f8fafc';
+            ctx.fillStyle = isDark ? '#0b0f19' : '#f8fafc';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Draw Grid Lines (1 Meter Grid)
+            // Draw Metric Grid Lines
             ctx.strokeStyle = isDark ? 'rgba(51, 65, 85, 0.4)' : 'rgba(203, 213, 225, 0.8)';
             ctx.lineWidth = 1;
 
@@ -899,20 +885,10 @@
                 ctx.stroke();
             }
 
-            // Draw Circulation Pathways Overlay (Flow Lines)
-            if (state.showFlow) {
-                drawPathwaysOverlay(scale, isDark);
-            }
+            if (state.showFlow) drawPathwaysOverlay(scale, isDark);
+            if (state.showSightlines) drawSightlinesOverlay(scale);
 
-            // Draw Teacher Sightlines Overlay
-            if (state.showSightlines) {
-                drawSightlinesOverlay(scale);
-            }
-
-            // Draw Furniture Items
-            state.items.forEach(item => {
-                drawFurnitureItem(item, scale, isDark);
-            });
+            state.items.forEach(item => drawFurnitureItem(item, scale, isDark));
         }
 
         function drawFurnitureItem(item, scale, isDark) {
@@ -928,14 +904,12 @@
 
             const isSelected = (item.id === state.selectedItemId);
 
-            // Selection Glow
             if (isSelected) {
                 ctx.shadowColor = '#22c55e';
-                ctx.shadowBlur = 12;
+                ctx.shadowBlur = 14;
             }
 
-            // Draw Body Shape
-            ctx.fillStyle = item.type === 'presentation-mat' ? 'rgba(244, 63, 94, 0.15)' : def.color;
+            ctx.fillStyle = item.type === 'presentation-mat' ? 'rgba(244, 63, 94, 0.18)' : def.color;
             ctx.strokeStyle = isSelected ? '#22c55e' : (isDark ? '#e2e8f0' : '#1e293b');
             ctx.lineWidth = isSelected ? 2.5 : 1.5;
 
@@ -951,15 +925,12 @@
                 ctx.stroke();
             }
 
-            // Draw Label & Seats Indicator
-            ctx.shadowBlur = 0; // reset
+            ctx.shadowBlur = 0;
             ctx.fillStyle = '#ffffff';
             ctx.font = '600 10px Inter, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-
-            const displayLabel = item.customLabel || def.label;
-            ctx.fillText(displayLabel, 0, 0);
+            ctx.fillText(item.customLabel || def.label, 0, 0);
 
             ctx.restore();
         }
@@ -967,17 +938,15 @@
         function drawSightlinesOverlay(scale) {
             const teacher = state.items.find(i => i.type === 'teacher-desk');
             if (!teacher) return;
-
             const tDef = ITEM_TYPES['teacher-desk'];
             const tx = (teacher.x + tDef.width / 2) * scale;
             const ty = (teacher.y + tDef.height / 2) * scale;
 
             ctx.save();
             ctx.fillStyle = 'rgba(20, 184, 166, 0.08)';
-            ctx.strokeStyle = 'rgba(20, 184, 166, 0.4)';
+            ctx.strokeStyle = 'rgba(20, 184, 166, 0.35)';
             ctx.lineWidth = 1.5;
 
-            // Draw Field of View Cone facing downwards into room
             ctx.beginPath();
             ctx.moveTo(tx, ty);
             ctx.arc(tx, ty, canvas.width * 0.9, Math.PI * 0.15, Math.PI * 0.85);
@@ -985,7 +954,6 @@
             ctx.fill();
             ctx.stroke();
 
-            // Connect rays to student desks
             state.items.filter(i => ITEM_TYPES[i.type]?.capacity > 0).forEach(st => {
                 const sDef = ITEM_TYPES[st.type];
                 const sx = (st.x + sDef.width / 2) * scale;
@@ -1005,29 +973,23 @@
 
         function drawPathwaysOverlay(scale, isDark) {
             ctx.save();
-            ctx.strokeStyle = isDark ? 'rgba(251, 191, 36, 0.25)' : 'rgba(217, 119, 6, 0.3)';
-            ctx.lineWidth = 18;
+            ctx.strokeStyle = isDark ? 'rgba(251, 191, 36, 0.2)' : 'rgba(217, 119, 6, 0.25)';
+            ctx.lineWidth = 16;
             ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-
-            // Primary Aisles
             const L = canvas.width;
             const W = canvas.height;
 
             ctx.beginPath();
-            // Center aisle
             ctx.moveTo(L / 2, scale * 1.5);
             ctx.lineTo(L / 2, W - scale);
-            // Side clearance
             ctx.moveTo(scale, W - scale);
             ctx.lineTo(L - scale, W - scale);
             ctx.stroke();
-
             ctx.restore();
         }
 
         /* ==========================================================================
-           CANVAS INTERACTION LOGIC (DRAG & DROP, SELECTION)
+           INTERACTION & SELECTION HANDLING
            ========================================================================== */
         function getItemAtCoords(x, y) {
             const scale = state.scale * state.zoomLevel;
@@ -1039,9 +1001,7 @@
                 const iw = def.width * scale;
                 const ih = def.height * scale;
 
-                if (x >= ix && x <= ix + iw && y >= iy && y <= iy + ih) {
-                    return item;
-                }
+                if (x >= ix && x <= ix + iw && y >= iy && y <= iy + ih) return item;
             }
             return null;
         }
@@ -1056,10 +1016,7 @@
                 state.selectedItemId = item.id;
                 state.isDragging = true;
                 const scale = state.scale * state.zoomLevel;
-                state.dragOffset = {
-                    x: mouseX - (item.x * scale),
-                    y: mouseY - (item.y * scale)
-                };
+                state.dragOffset = { x: mouseX - (item.x * scale), y: mouseY - (item.y * scale) };
                 showInspector(item);
             } else {
                 state.selectedItemId = null;
@@ -1078,13 +1035,11 @@
             let newX = (mouseX - state.dragOffset.x) / scale;
             let newY = (mouseY - state.dragOffset.y) / scale;
 
-            // Grid snapping
             if (state.gridSnap) {
-                newX = Math.round(newX * 4) / 4; // snap to 0.25m
+                newX = Math.round(newX * 4) / 4;
                 newY = Math.round(newY * 4) / 4;
             }
 
-            // Boundary constraints
             const item = state.items.find(i => i.id === state.selectedItemId);
             if (item) {
                 const def = ITEM_TYPES[item.type];
@@ -1108,6 +1063,7 @@
 
         function handleTouchMove(e) {
             if (e.touches.length === 1) {
+                e.preventDefault();
                 const touch = e.touches[0];
                 handleCanvasMouseMove({ clientX: touch.clientX, clientY: touch.clientY });
             }
@@ -1162,8 +1118,8 @@
         }
 
         function showInspector(item) {
-            const panel = document.getElementById('inspectorPanel');
-            panel.classList.remove('hidden');
+            document.getElementById('inspectorPanel')?.classList.remove('hidden');
+            document.getElementById('inspectorEmptyState')?.classList.add('hidden');
             document.getElementById('selectedItemType').innerText = ITEM_TYPES[item.type]?.label || item.type;
             document.getElementById('rotateSlider').value = item.rotation || 0;
             document.getElementById('rotateValDisplay').innerText = `${item.rotation || 0}°`;
@@ -1171,7 +1127,8 @@
         }
 
         function hideInspector() {
-            document.getElementById('inspectorPanel').classList.add('hidden');
+            document.getElementById('inspectorPanel')?.classList.add('hidden');
+            document.getElementById('inspectorEmptyState')?.classList.remove('hidden');
         }
 
         function exportCanvasImage() {
@@ -1182,57 +1139,49 @@
         }
 
         /* ==========================================================================
-           ANALYTICS & METRICS CALCULATOR
+           METRICS & ANALYTICS CALCULATOR
            ========================================================================== */
         function updateMetrics() {
-            // Capacity Calculation
             let currentSeats = 0;
-            state.items.forEach(item => {
-                const cap = ITEM_TYPES[item.type]?.capacity || 0;
-                currentSeats += cap;
-            });
-
-            document.getElementById('metricCapacityCurrent').innerText = currentSeats;
-            document.getElementById('metricCapacityTarget').innerText = state.targetStudents;
-
-            // PAK-21 Collaboration Score Calculation
             let collabDesks = 0;
             let totalDesks = 0;
 
             state.items.forEach(item => {
-                if (ITEM_TYPES[item.type]?.capacity > 0) {
+                const cap = ITEM_TYPES[item.type]?.capacity || 0;
+                currentSeats += cap;
+                if (cap > 0) {
                     totalDesks++;
-                    // Group/Round desks provide higher collaboration index
-                    if (item.type === 'double-desk' || item.type === 'round-table') {
-                        collabDesks++;
-                    }
+                    if (item.type === 'double-desk' || item.type === 'round-table') collabDesks++;
                 }
             });
+
+            const capBar = document.getElementById('metricCapacityBar');
+            const capVal = document.getElementById('metricCapacityCurrent');
+            const capTarget = document.getElementById('metricCapacityTarget');
+
+            if (capVal) capVal.innerText = currentSeats;
+            if (capTarget) capTarget.innerText = state.targetStudents;
+            if (capBar) capBar.style.width = `${Math.min(100, (currentSeats / state.targetStudents) * 100)}%`;
 
             let collabPercent = totalDesks > 0 ? Math.round((collabDesks / totalDesks) * 100) : 0;
             document.getElementById('metricCollabVal').innerText = `${collabPercent}%`;
             document.getElementById('metricCollabBar').style.width = `${collabPercent}%`;
 
-            // Teacher Visibility Score
             const teacher = state.items.find(i => i.type === 'teacher-desk');
-            let visibilityVal = 95;
-            if (!teacher) visibilityVal = 40;
+            let visibilityVal = teacher ? 95 : 40;
             document.getElementById('metricVisibilityVal').innerText = `${visibilityVal}%`;
             document.getElementById('metricVisibilityBar').style.width = `${visibilityVal}%`;
 
-            // Pathway Clearance Score
             let pathwayVal = Math.max(65, Math.min(98, 100 - (state.items.length * 1.5)));
             document.getElementById('metricPathwayVal').innerText = `${Math.round(pathwayVal)}%`;
             document.getElementById('metricPathwayBar').style.width = `${pathwayVal}%`;
         }
 
         /* ==========================================================================
-           3D PERSPECTIVE RENDERER (THREE.JS)
+           THREE.JS 3D SPATIAL ORBIT SIMULATION
            ========================================================================== */
         function open3DModal() {
-            const modal = document.getElementById('modal3d');
-            modal.classList.remove('hidden');
-
+            document.getElementById('modal3d').classList.remove('hidden');
             setTimeout(() => {
                 init3DScene();
                 document.getElementById('loading3d').classList.add('hidden');
@@ -1245,31 +1194,26 @@
 
         function init3DScene() {
             const container = document.getElementById('container3d');
-            container.innerHTML = ''; // clear
+            container.innerHTML = '';
 
             const width = container.clientWidth;
             const height = container.clientHeight;
 
-            // Scene
             threeScene = new THREE.Scene();
-            threeScene.background = new THREE.Color(0x0f172a);
+            threeScene.background = new THREE.Color(0x0b0f19);
 
-            // Camera
             threeCamera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
             threeCamera.position.set(state.roomLengthMeters / 2, 12, state.roomWidthMeters * 1.5);
 
-            // Renderer
             threeRenderer = new THREE.WebGLRenderer({ antialias: true });
             threeRenderer.setSize(width, height);
             threeRenderer.shadowMap.enabled = true;
             container.appendChild(threeRenderer.domElement);
 
-            // Orbit Controls
             threeControls = new THREE.OrbitControls(threeCamera, threeRenderer.domElement);
             threeControls.target.set(state.roomLengthMeters / 2, 0, state.roomWidthMeters / 2);
             threeControls.update();
 
-            // Lighting
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             threeScene.add(ambientLight);
 
@@ -1278,13 +1222,11 @@
             dirLight.castShadow = true;
             threeScene.add(dirLight);
 
-            // Room Floor & Walls
             const L = state.roomLengthMeters;
             const W = state.roomWidthMeters;
 
-            // Floor Grid mesh
             const floorGeo = new THREE.PlaneGeometry(L, W);
-            const floorMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0x151d30, roughness: 0.8 });
             const floor = new THREE.Mesh(floorGeo, floorMat);
             floor.rotation.x = -Math.PI / 2;
             floor.position.set(L / 2, 0, W / 2);
@@ -1295,7 +1237,6 @@
             gridHelper.position.set(L / 2, 0.01, W / 2);
             threeScene.add(gridHelper);
 
-            // Render Furniture Meshes
             state.items.forEach(item => {
                 const def = ITEM_TYPES[item.type];
                 if (!def) return;
@@ -1304,8 +1245,7 @@
                 const mat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.4 });
 
                 let geo;
-                let height3D = 0.7; // default desk height in meters
-
+                let height3D = 0.7;
                 if (item.type === 'smartboard') height3D = 1.2;
                 if (item.type === 'presentation-mat') height3D = 0.02;
 
@@ -1319,18 +1259,11 @@
                 mesh.castShadow = true;
                 mesh.receiveShadow = true;
 
-                // Position (Center offset for Three.js geometry)
-                const posX = item.x + def.width / 2;
-                const posZ = item.y + def.height / 2;
-                const posY = height3D / 2;
-
-                mesh.position.set(posX, posY, posZ);
+                mesh.position.set(item.x + def.width / 2, height3D / 2, item.y + def.height / 2);
                 mesh.rotation.y = -(item.rotation * Math.PI) / 180;
-
                 threeScene.add(mesh);
             });
 
-            // Animation Loop
             function animate3D() {
                 if (document.getElementById('modal3d').classList.contains('hidden')) return;
                 requestAnimationFrame(animate3D);
@@ -1341,7 +1274,7 @@
         }
 
         /* ==========================================================================
-           AI PEDAGOGICAL AUDIT & REPORT GENERATOR
+           AI DIAGNOSTIC AUDIT REPORT GENERATOR
            ========================================================================== */
         function generateAiReport() {
             const modal = document.getElementById('modalAiReport');
@@ -1351,65 +1284,65 @@
             state.items.forEach(i => seatCount += (ITEM_TYPES[i.type]?.capacity || 0));
 
             const hasSmartboard = state.items.some(i => i.type === 'smartboard');
-            const hasPresentationZone = state.items.some(i => i.type === 'presentation-mat');
+            const hasStage = state.items.some(i => i.type === 'presentation-mat');
             const groupDesks = state.items.filter(i => i.type === 'double-desk' || i.type === 'round-table').length;
 
-            let layoutTypeStr = groupDesks > 4 ? 'Flexible Collaborative Clusters (Kumpulan)' : 'Linear Row Layout';
+            let layoutTypeStr = groupDesks > 4 ? 'Flexible Collaborative Pods (Kumpulan)' : 'Linear Exam Seating';
 
             content.innerHTML = `
-                <div class="grid grid-cols-3 gap-4 mb-6">
+                <div class="grid grid-cols-3 gap-3 md:gap-4 mb-4">
                     <div class="p-3 bg-slate-900 rounded-xl border border-slate-800">
-                        <span class="text-xs text-slate-400 block">Classroom Footprint</span>
-                        <span class="text-base font-bold text-emerald-400">${state.roomLengthMeters * state.roomWidthMeters} m²</span>
+                        <span class="text-[10px] md:text-xs text-slate-400 block">Class Footprint</span>
+                        <span class="text-sm md:text-base font-bold text-emerald-400 font-mono">${(state.roomLengthMeters * state.roomWidthMeters).toFixed(1)} m²</span>
                     </div>
                     <div class="p-3 bg-slate-900 rounded-xl border border-slate-800">
-                        <span class="text-xs text-slate-400 block">Seat vs Target</span>
-                        <span class="text-base font-bold text-teal-400">${seatCount} / ${state.targetStudents}</span>
+                        <span class="text-[10px] md:text-xs text-slate-400 block">Seats vs Target</span>
+                        <span class="text-sm md:text-base font-bold text-teal-400 font-mono">${seatCount} / ${state.targetStudents}</span>
                     </div>
                     <div class="p-3 bg-slate-900 rounded-xl border border-slate-800">
-                        <span class="text-xs text-slate-400 block">Primary Model</span>
-                        <span class="text-base font-bold text-indigo-400">${layoutTypeStr}</span>
+                        <span class="text-[10px] md:text-xs text-slate-400 block">Identified Model</span>
+                        <span class="text-xs md:text-sm font-bold text-indigo-400 truncate block">${layoutTypeStr}</span>
                     </div>
                 </div>
 
                 <div class="space-y-4">
-                    <h3 class="font-bold text-slate-100 flex items-center gap-2 text-base">
-                        <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i> PAK-21 Core Compliance Summary
+                    <h3 class="font-bold text-slate-100 flex items-center gap-2 text-sm md:text-base">
+                        <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i> PAK-21 Core Compliance Audit
                     </h3>
 
-                    <div class="p-4 bg-slate-900/60 rounded-xl border border-slate-800 space-y-3">
+                    <div class="p-4 bg-slate-900/70 rounded-xl border border-slate-800 space-y-3">
                         <div class="flex items-start gap-3">
                             <div class="p-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg mt-0.5"><i data-lucide="users" class="w-4 h-4"></i></div>
                             <div>
-                                <h4 class="font-semibold text-xs text-slate-200">Collaborative Learning Support</h4>
-                                <p class="text-xs text-slate-400 mt-0.5">Your layout utilizes ${groupDesks} multi-student clusters. This aligns with standard PAK-21 Pembelajaran Kooperatif (Cooperative Learning) guidelines.</p>
+                                <h4 class="font-semibold text-xs text-slate-200">Collaborative Desk Configuration</h4>
+                                <p class="text-xs text-slate-400 mt-0.5">Your layout contains ${groupDesks} active group pods. Supports PAK-21 Pembelajaran Kooperatif (Cooperative Learning) directives.</p>
                             </div>
                         </div>
 
                         <div class="flex items-start gap-3">
                             <div class="p-1.5 bg-blue-500/20 text-blue-400 rounded-lg mt-0.5"><i data-lucide="presentation" class="w-4 h-4"></i></div>
                             <div>
-                                <h4 class="font-semibold text-xs text-slate-200">Active Presentation & Student Expression</h4>
-                                <p class="text-xs text-slate-400 mt-0.5">${hasPresentationZone ? 'Dedicated student presentation stage detected. Supports Student-Centered Gallery Walks & Presentations.' : 'Consider adding a dedicated Presentation Stage Mat to enhance student showcase activities.'}</p>
+                                <h4 class="font-semibold text-xs text-slate-200">Student Presentation Zone</h4>
+                                <p class="text-xs text-slate-400 mt-0.5">${hasStage ? 'Dedicated presentation space detected. Facilitates student showcase and gallery walks.' : 'Add a Stage Zone element to encourage active presentation tasks.'}</p>
                             </div>
                         </div>
 
                         <div class="flex items-start gap-3">
                             <div class="p-1.5 bg-purple-500/20 text-purple-400 rounded-lg mt-0.5"><i data-lucide="eye" class="w-4 h-4"></i></div>
                             <div>
-                                <h4 class="font-semibold text-xs text-slate-200">Teacher Sightlines & Facilitation</h4>
-                                <p class="text-xs text-slate-400 mt-0.5">${hasSmartboard ? 'Smartboard position optimized for high visibility across all seating zones.' : 'Ensure a primary display focal board is positioned for optimal sightline clarity.'}</p>
+                                <h4 class="font-semibold text-xs text-slate-200">Visual Range & Sightlines</h4>
+                                <p class="text-xs text-slate-400 mt-0.5">${hasSmartboard ? 'Smartboard position optimized for clear line-of-sight visual engagement.' : 'Position a primary Smartboard focal point along the main front wall.'}</p>
                             </div>
                         </div>
                     </div>
 
-                    <h3 class="font-bold text-slate-100 flex items-center gap-2 text-base pt-2">
-                        <i data-lucide="lightbulb" class="w-5 h-5 text-amber-400"></i> Recommendations for Optimization
+                    <h3 class="font-bold text-slate-100 flex items-center gap-2 text-sm md:text-base pt-2">
+                        <i data-lucide="lightbulb" class="w-5 h-5 text-amber-400"></i> Actionable Pedagogical Recommendations
                     </h3>
-                    <ul class="list-disc list-inside space-y-1.5 text-xs text-slate-300 bg-amber-950/20 p-4 rounded-xl border border-amber-500/20">
-                        <li>Maintain at least 1.2 meters clear aisle width between outer desks and classroom walls for smooth movement during rotation activities.</li>
-                        <li>Position PAK-21 Reading Corners or Bookshelves near entrance doors for quick resource access during lesson transitions.</li>
-                        <li>Ensure student chairs are angled maximum 45° relative to the main smartboard to avoid visual strain.</li>
+                    <ul class="list-disc list-inside space-y-1 text-xs text-slate-300 bg-amber-950/20 p-4 rounded-xl border border-amber-500/20">
+                        <li>Ensure perimeter clearance aisles are kept at a minimum of 1.2 meters to permit smooth rotation during activity stations.</li>
+                        <li>Angle student desks no more than 45 degrees relative to the primary display board to avoid neck strain.</li>
+                        <li>Keep resource shelves near classroom entry doorways for effortless distribution of learning materials.</li>
                     </ul>
                 </div>
             `;
