@@ -117,62 +117,68 @@
             </div>
         </div>
 
-        <!-- Desktop Main Toolbar -->
-        <div class="hidden lg:flex items-center gap-2.5 text-xs">
-            <!-- Room Dimensions -->
-            <div class="flex items-center space-x-2 bg-slate-800/90 px-3 py-1.5 rounded-xl border border-slate-700/70">
-                <i data-lucide="ruler" class="w-4 h-4 text-emerald-400"></i>
-                <span class="font-medium text-slate-300">Dim (m):</span>
-                <input type="number" id="roomLength" value="10" min="5" max="25" class="w-12 bg-slate-900 text-center rounded py-0.5 border border-slate-700 text-xs focus:outline-none focus:border-emerald-500">
-                <span class="text-slate-500">×</span>
-                <input type="number" id="roomWidth" value="8" min="4" max="20" class="w-12 bg-slate-900 text-center rounded py-0.5 border border-slate-700 text-xs focus:outline-none focus:border-emerald-500">
+        <!-- Desktop & Tablet Main Toolbar -->
+        <div class="hidden md:flex flex-col gap-2.5 flex-1 items-end justify-center text-xs">
+            <!-- Row 1: Classroom Settings -->
+            <div class="flex flex-wrap items-center justify-end gap-2.5">
+                <!-- Room Dimensions -->
+                <div class="flex items-center space-x-2 bg-slate-800/90 px-3 py-1.5 rounded-xl border border-slate-700/70 shadow-sm">
+                    <i data-lucide="ruler" class="w-4 h-4 text-emerald-400"></i>
+                    <span class="font-medium text-slate-300">Dim (m):</span>
+                    <input type="number" id="roomLength" value="10" min="5" max="25" class="w-12 bg-slate-900 text-center rounded py-0.5 border border-slate-700 text-xs focus:outline-none focus:border-emerald-500">
+                    <span class="text-slate-500">×</span>
+                    <input type="number" id="roomWidth" value="8" min="4" max="20" class="w-12 bg-slate-900 text-center rounded py-0.5 border border-slate-700 text-xs focus:outline-none focus:border-emerald-500">
+                </div>
+
+                <!-- Target Capacity -->
+                <div class="flex items-center space-x-2 bg-slate-800/90 px-3 py-1.5 rounded-xl border border-slate-700/70 shadow-sm">
+                    <i data-lucide="users" class="w-4 h-4 text-teal-400"></i>
+                    <span class="font-medium text-slate-300">Target Students:</span>
+                    <input type="number" id="targetStudents" value="30" min="5" max="60" class="w-12 bg-slate-900 text-center rounded py-0.5 border border-slate-700 text-xs focus:outline-none focus:border-emerald-500">
+                </div>
+
+                <!-- Undo / Redo Actions -->
+                <div class="flex items-center gap-1 bg-slate-800/90 p-1 rounded-xl border border-slate-700/70 shadow-sm">
+                    <button id="undoBtn" class="p-1.5 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition" title="Undo"><i data-lucide="undo" class="w-3.5 h-3.5"></i></button>
+                    <button id="redoBtn" class="p-1.5 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition" title="Redo"><i data-lucide="redo" class="w-3.5 h-3.5"></i></button>
+                </div>
             </div>
 
-            <!-- Target Capacity -->
-            <div class="flex items-center space-x-2 bg-slate-800/90 px-3 py-1.5 rounded-xl border border-slate-700/70">
-                <i data-lucide="users" class="w-4 h-4 text-teal-400"></i>
-                <span class="font-medium text-slate-300">Target Students:</span>
-                <input type="number" id="targetStudents" value="30" min="5" max="60" class="w-12 bg-slate-900 text-center rounded py-0.5 border border-slate-700 text-xs focus:outline-none focus:border-emerald-500">
-            </div>
+            <!-- Row 2: Display & Layout Controls -->
+            <div class="flex flex-wrap items-center justify-end gap-2.5">
+                <!-- Overlays & Toggles -->
+                <div class="flex items-center gap-1 bg-slate-800/90 p-1 rounded-xl border border-slate-700/70 shadow-sm">
+                    <button id="toggleSightlinesBtn" class="px-2.5 py-1 rounded-lg text-xs flex items-center gap-1.5 bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 font-medium">
+                        <i data-lucide="eye" class="w-3.5 h-3.5"></i> Sightlines
+                    </button>
+                    <button id="toggleFlowBtn" class="px-2.5 py-1 rounded-lg text-xs flex items-center gap-1.5 bg-teal-600/30 text-teal-300 border border-teal-500/40 font-medium">
+                        <i data-lucide="footprints" class="w-3.5 h-3.5"></i> Flow Lines
+                    </button>
+                    <button id="toggleGridBtn" class="px-2.5 py-1 rounded-lg text-xs flex items-center gap-1.5 bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 font-medium">
+                        <i data-lucide="grid" class="w-3.5 h-3.5"></i> Snap Grid
+                    </button>
+                </div>
 
-            <!-- Undo / Redo Actions -->
-            <div class="flex items-center gap-1 bg-slate-800/90 p-1 rounded-xl border border-slate-700/70">
-                <button id="undoBtn" class="p-1.5 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition" title="Undo"><i data-lucide="undo" class="w-3.5 h-3.5"></i></button>
-                <button id="redoBtn" class="p-1.5 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition" title="Redo"><i data-lucide="redo" class="w-3.5 h-3.5"></i></button>
-            </div>
-
-            <!-- Overlays & Toggles -->
-            <div class="flex items-center gap-1 bg-slate-800/90 p-1 rounded-xl border border-slate-700/70">
-                <button id="toggleSightlinesBtn" class="px-2.5 py-1 rounded-lg text-xs flex items-center gap-1.5 bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 font-medium">
-                    <i data-lucide="eye" class="w-3.5 h-3.5"></i> Sightlines
-                </button>
-                <button id="toggleFlowBtn" class="px-2.5 py-1 rounded-lg text-xs flex items-center gap-1.5 bg-teal-600/30 text-teal-300 border border-teal-500/40 font-medium">
-                    <i data-lucide="footprints" class="w-3.5 h-3.5"></i> Flow Lines
-                </button>
-                <button id="toggleGridBtn" class="px-2.5 py-1 rounded-lg text-xs flex items-center gap-1.5 bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 font-medium">
-                    <i data-lucide="grid" class="w-3.5 h-3.5"></i> Snap Grid
-                </button>
-            </div>
-
-            <!-- Primary Actions -->
-            <div class="flex items-center gap-2">
-                <button id="resetCanvasBtn" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition" title="Clear Canvas">
-                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                </button>
-                <button id="exportImgBtn" class="p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition" title="Export Image">
-                    <i data-lucide="download" class="w-4 h-4"></i>
-                </button>
-                <button id="open3dBtn" class="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium rounded-xl shadow-md flex items-center gap-1.5 transition">
-                    <i data-lucide="box" class="w-4 h-4"></i> 3D Orbit
-                </button>
-                <button id="generateAiReportBtn" class="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-600/20 flex items-center gap-1.5 transition">
-                    <i data-lucide="sparkles" class="w-4 h-4"></i> PAK-21 AI Audit
-                </button>
+                <!-- Primary Actions -->
+                <div class="flex items-center gap-2">
+                    <button id="resetCanvasBtn" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition" title="Clear Canvas">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                    <button id="exportImgBtn" class="p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition" title="Export Image">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                    </button>
+                    <button id="open3dBtn" class="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium rounded-xl shadow-md flex items-center gap-1.5 transition">
+                        <i data-lucide="box" class="w-4 h-4"></i> 3D Orbit
+                    </button>
+                    <button id="generateAiReportBtn" class="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-600/20 flex items-center gap-1.5 transition">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i> PAK-21 AI Audit
+                    </button>
+                </div>
             </div>
         </div>
 
         <!-- Mobile Header Actions -->
-        <div class="flex lg:hidden items-center gap-2">
+        <div class="flex md:hidden items-center gap-2">
             <button id="mobileSettingsToggleBtn" class="p-2 text-slate-300 bg-slate-800/90 rounded-xl border border-slate-700">
                 <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
             </button>
@@ -180,7 +186,7 @@
     </header>
 
     <!-- MOBILE QUICK SETTINGS DRAWER -->
-    <div id="mobileSettingsDrawer" class="hidden lg:hidden bg-slate-900 border-b border-slate-800 p-3 flex-col gap-3 text-xs z-20 shrink-0">
+    <div id="mobileSettingsDrawer" class="hidden md:hidden bg-slate-900 border-b border-slate-800 p-3 flex-col gap-3 text-xs z-20 shrink-0">
         <div class="flex justify-between items-center gap-2">
             <div class="flex items-center space-x-1.5">
                 <i data-lucide="ruler" class="w-3.5 h-3.5 text-emerald-400"></i>
