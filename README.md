@@ -213,7 +213,7 @@
     <main class="flex-1 flex flex-col lg:flex-row overflow-hidden relative min-h-0 min-w-0">
         
         <!-- LEFT SIDEBAR: PRESETS & PALETTE (DESKTOP & MOBILE BOTTOM DRAWER) -->
-        <aside id="leftSidebar" class="w-full lg:w-80 glass-panel border-r border-slate-800 flex flex-col h-full z-20 shrink-0 transition-all duration-300 hidden lg:flex min-h-0">
+        <aside id="leftSidebar" class="w-full lg:w-80 glass-panel lg:border-r border-slate-800 flex flex-col h-full z-40 shrink-0 transition-all duration-300 hidden lg:flex absolute lg:static inset-0 lg:inset-auto bg-slate-900/95 lg:bg-transparent pb-16 lg:pb-0 min-h-0">
             <!-- Sidebar Navigation Tabs -->
             <div class="flex border-b border-slate-800 bg-slate-900/60 shrink-0">
                 <button id="tabPresets" class="flex-1 py-3 text-xs font-semibold text-emerald-400 border-b-2 border-emerald-500 flex items-center justify-center gap-1.5">
@@ -380,7 +380,7 @@
         </section>
 
         <!-- RIGHT SIDEBAR: INSPECTOR & LIVE METRICS (DESKTOP) -->
-        <aside id="rightSidebar" class="w-full lg:w-80 glass-panel border-l border-slate-800 flex flex-col h-full z-20 shrink-0 hidden lg:flex min-h-0">
+        <aside id="rightSidebar" class="w-full lg:w-80 glass-panel lg:border-l border-slate-800 flex flex-col h-full z-40 shrink-0 hidden lg:flex absolute lg:static inset-0 lg:inset-auto bg-slate-900/95 lg:bg-transparent pb-16 lg:pb-0 min-h-0">
             <!-- Inspector / Selected Item Card -->
             <div class="p-4 border-b border-slate-800 space-y-3 shrink-0">
                 <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -495,8 +495,12 @@
     </div>
 
     <!-- MOBILE BOTTOM NAVIGATION TAB BAR -->
-    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 border-t border-slate-800 px-2 py-2 flex justify-around items-center glass-panel shrink-0">
-        <button id="mobNavPresets" class="flex flex-col items-center text-emerald-400">
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-900/95 border-t border-slate-800 px-2 py-2 flex justify-around items-center glass-panel shrink-0">
+        <button id="mobNavCanvas" class="flex flex-col items-center text-emerald-400">
+            <i data-lucide="layout" class="w-4 h-4"></i>
+            <span class="text-[10px] mt-0.5">Canvas</span>
+        </button>
+        <button id="mobNavPresets" class="flex flex-col items-center text-slate-400">
             <i data-lucide="layout-template" class="w-4 h-4"></i>
             <span class="text-[10px] mt-0.5">Presets</span>
         </button>
@@ -617,8 +621,18 @@
             initCanvas();
             bindEvents();
             loadPreset('kumpulan');
-            lucide.createIcons();
+            safeCreateIcons();
         });
+
+        function safeCreateIcons() {
+            try {
+                if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                    lucide.createIcons();
+                }
+            } catch (err) {
+                console.warn('Lucide icons warning:', err);
+            }
+        }
 
         function saveHistory() {
             if (state.historyIndex < state.history.length - 1) {
@@ -651,15 +665,34 @@
             canvas = document.getElementById('classroomCanvas');
             ctx = canvas.getContext('2d');
             updateCanvasSize();
-            window.addEventListener('resize', updateCanvasSize);
+            // Debounce resize slightly for performance
+            let resizeTimeout;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(updateCanvasSize, 50);
+            });
         }
 
         function updateCanvasSize() {
-            const lengthInput = document.getElementById('roomLength')?.value || 10;
-            const widthInput = document.getElementById('roomWidth')?.value || 8;
+            const lengthInput = document.getElementById('roomLength')?.value || document.getElementById('roomLengthMob')?.value || 10;
+            const widthInput = document.getElementById('roomWidth')?.value || document.getElementById('roomWidthMob')?.value || 8;
 
             state.roomLengthMeters = parseFloat(lengthInput);
             state.roomWidthMeters = parseFloat(widthInput);
+
+            // Responsive auto-scaling to fit the canvas comfortably in any screen size
+            const section = canvas.closest('section');
+            if (section) {
+                const availW = section.clientWidth - 32; // 16px padding on sides
+                const availH = section.clientHeight - 80; // Account for HUD elements + padding
+                const pad = 0.95; 
+                
+                const scaleW = (availW * pad) / state.roomLengthMeters;
+                const scaleH = (availH * pad) / state.roomWidthMeters;
+                
+                state.scale = Math.floor(Math.min(scaleW, scaleH));
+                if (state.scale < 20) state.scale = 20; // Sanity check minimum scale
+            }
 
             const dpr = window.devicePixelRatio || 1;
             const cssWidth = state.roomLengthMeters * state.scale * state.zoomLevel;
@@ -674,15 +707,31 @@
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.scale(dpr, dpr);
 
+            const scaleMeter = document.getElementById('scaleMeterVal');
+            if (scaleMeter) scaleMeter.innerText = Math.round(state.scale * state.zoomLevel);
+
             document.getElementById('canvasDimLabel').innerText = `${state.roomLengthMeters.toFixed(1)}m x ${state.roomWidthMeters.toFixed(1)}m`;
             renderCanvas();
         }
 
         function bindEvents() {
-            document.getElementById('roomLength')?.addEventListener('change', updateCanvasSize);
-            document.getElementById('roomWidth')?.addEventListener('change', updateCanvasSize);
-            document.getElementById('targetStudents')?.addEventListener('change', (e) => {
-                state.targetStudents = parseInt(e.target.value) || 30;
+            // Synchronize dual inputs across Desktop header & Mobile drawer
+            function syncInputs(id1, id2, callback) {
+                const el1 = document.getElementById(id1);
+                const el2 = document.getElementById(id2);
+                const update = (val) => {
+                    if (el1) el1.value = val;
+                    if (el2) el2.value = val;
+                    callback();
+                };
+                el1?.addEventListener('change', (e) => update(e.target.value));
+                el2?.addEventListener('change', (e) => update(e.target.value));
+            }
+
+            syncInputs('roomLength', 'roomLengthMob', updateCanvasSize);
+            syncInputs('roomWidth', 'roomWidthMob', updateCanvasSize);
+            syncInputs('targetStudents', 'targetStudentsMob', () => {
+                state.targetStudents = parseInt(document.getElementById('targetStudents').value) || 30;
                 updateMetrics();
             });
 
@@ -824,31 +873,70 @@
             const rightSidebar = document.getElementById('rightSidebar');
             const mobSettingsDrawer = document.getElementById('mobileSettingsDrawer');
 
+            const navBtns = [
+                document.getElementById('mobNavCanvas'),
+                document.getElementById('mobNavPresets'),
+                document.getElementById('mobNavPalette'),
+                document.getElementById('mobNavInspector'),
+                document.getElementById('mobNavMetrics')
+            ];
+
+            function resetNav() {
+                navBtns.forEach(btn => {
+                    if (btn) {
+                        btn.classList.remove('text-emerald-400');
+                        btn.classList.add('text-slate-400');
+                    }
+                });
+                leftSidebar.classList.add('hidden');
+                leftSidebar.classList.remove('flex');
+                rightSidebar.classList.add('hidden');
+                rightSidebar.classList.remove('flex');
+            }
+
             document.getElementById('mobileSettingsToggleBtn')?.addEventListener('click', () => {
                 mobSettingsDrawer.classList.toggle('hidden');
                 mobSettingsDrawer.classList.toggle('flex');
             });
 
-            document.getElementById('mobNavPresets')?.addEventListener('click', () => {
+            document.getElementById('mobNavCanvas')?.addEventListener('click', (e) => {
+                resetNav();
+                e.currentTarget.classList.remove('text-slate-400');
+                e.currentTarget.classList.add('text-emerald-400');
+            });
+
+            document.getElementById('mobNavPresets')?.addEventListener('click', (e) => {
+                resetNav();
+                e.currentTarget.classList.remove('text-slate-400');
+                e.currentTarget.classList.add('text-emerald-400');
                 leftSidebar.classList.remove('hidden');
-                rightSidebar.classList.add('hidden');
+                leftSidebar.classList.add('flex');
                 switchSidebarTab('presets');
             });
 
-            document.getElementById('mobNavPalette')?.addEventListener('click', () => {
+            document.getElementById('mobNavPalette')?.addEventListener('click', (e) => {
+                resetNav();
+                e.currentTarget.classList.remove('text-slate-400');
+                e.currentTarget.classList.add('text-emerald-400');
                 leftSidebar.classList.remove('hidden');
-                rightSidebar.classList.add('hidden');
+                leftSidebar.classList.add('flex');
                 switchSidebarTab('palette');
             });
 
-            document.getElementById('mobNavInspector')?.addEventListener('click', () => {
-                leftSidebar.classList.add('hidden');
+            document.getElementById('mobNavInspector')?.addEventListener('click', (e) => {
+                resetNav();
+                e.currentTarget.classList.remove('text-slate-400');
+                e.currentTarget.classList.add('text-emerald-400');
                 rightSidebar.classList.remove('hidden');
+                rightSidebar.classList.add('flex');
             });
 
-            document.getElementById('mobNavMetrics')?.addEventListener('click', () => {
-                leftSidebar.classList.add('hidden');
+            document.getElementById('mobNavMetrics')?.addEventListener('click', (e) => {
+                resetNav();
+                e.currentTarget.classList.remove('text-slate-400');
+                e.currentTarget.classList.add('text-emerald-400');
                 rightSidebar.classList.remove('hidden');
+                rightSidebar.classList.add('flex');
             });
         }
 
@@ -1230,7 +1318,7 @@
             document.getElementById('modal3d').classList.remove('hidden');
             setTimeout(() => {
                 init3DScene();
-                document.getElementById('loading3d').classList.add('hidden');
+                document.getElementById('loading3d')?.classList.add('hidden');
             }, 100);
         }
 
@@ -1240,10 +1328,16 @@
 
         function init3DScene() {
             const container = document.getElementById('container3d');
+            if (!container) return;
             container.innerHTML = '';
 
-            const width = container.clientWidth;
-            const height = container.clientHeight;
+            const width = container.clientWidth || 600;
+            const height = container.clientHeight || 400;
+
+            if (typeof THREE === 'undefined') {
+                container.innerHTML = '<div class="p-6 text-center text-rose-400 font-medium text-xs">Three.js 3D library failed to load. Please check your internet connection.</div>';
+                return;
+            }
 
             threeScene = new THREE.Scene();
             threeScene.background = new THREE.Color(0x0b0f19);
@@ -1256,9 +1350,11 @@
             threeRenderer.shadowMap.enabled = true;
             container.appendChild(threeRenderer.domElement);
 
-            threeControls = new THREE.OrbitControls(threeCamera, threeRenderer.domElement);
-            threeControls.target.set(state.roomLengthMeters / 2, 0, state.roomWidthMeters / 2);
-            threeControls.update();
+            if (typeof THREE.OrbitControls !== 'undefined') {
+                threeControls = new THREE.OrbitControls(threeCamera, threeRenderer.domElement);
+                threeControls.target.set(state.roomLengthMeters / 2, 0, state.roomWidthMeters / 2);
+                threeControls.update();
+            }
 
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             threeScene.add(ambientLight);
@@ -1313,8 +1409,10 @@
             function animate3D() {
                 if (document.getElementById('modal3d').classList.contains('hidden')) return;
                 requestAnimationFrame(animate3D);
-                threeControls.update();
-                threeRenderer.render(threeScene, threeCamera);
+                if (threeControls) threeControls.update();
+                if (threeRenderer && threeScene && threeCamera) {
+                    threeRenderer.render(threeScene, threeCamera);
+                }
             }
             animate3D();
         }
@@ -1391,7 +1489,7 @@
                 </div>
             `;
 
-            lucide.createIcons();
+            safeCreateIcons();
             modal.classList.remove('hidden');
         }
     </script>
