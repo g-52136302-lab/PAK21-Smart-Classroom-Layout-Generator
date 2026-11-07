@@ -36,16 +36,21 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
-        * {
-            box-sizing: border-box;
-            touch-action: manipulation;
-        }
-
-        body {
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
             font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
             user-select: none;
             -webkit-user-select: none;
+        }
+
+        /* Prevent layout shift on GitHub Pages */
+        .viewport-container {
+            height: 100vh;
+            height: 100dvh;
         }
 
         /* Custom Scrollbar Styling */
@@ -65,16 +70,10 @@
         }
 
         .glass-panel {
-            background: rgba(21, 29, 48, 0.85);
+            background: rgba(21, 29, 48, 0.88);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .light .glass-panel {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(0, 0, 0, 0.08);
         }
 
         /* Printable PDF Styling */
@@ -100,44 +99,50 @@
         }
     </style>
 </head>
-<body class="bg-darkbg text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
+<body class="bg-darkbg text-slate-100 viewport-container flex flex-col transition-colors duration-200 overflow-hidden">
 
     <!-- TOP HEADER / CONTROL BAR -->
-    <header class="glass-panel sticky top-0 z-30 px-3 md:px-5 py-2.5 flex items-center justify-between gap-2 border-b border-slate-800">
+    <header class="glass-panel sticky top-0 z-30 px-3 md:px-5 py-2.5 flex items-center justify-between gap-2 border-b border-slate-800 shrink-0">
         <!-- Logo & Branding -->
         <div class="flex items-center space-x-3">
             <div class="p-2 bg-gradient-to-tr from-emerald-600 to-teal-500 rounded-xl shadow-lg shadow-emerald-500/20 shrink-0">
                 <i data-lucide="layout-grid" class="w-5 h-5 md:w-6 md:h-6 text-white"></i>
             </div>
             <div>
-                <h1 class="font-bold text-sm md:text-base leading-tight text-white dark:text-white light:text-slate-900 flex items-center gap-2">
+                <h1 class="font-bold text-sm md:text-base leading-tight text-white flex items-center gap-2">
                     PAK-21 Smart Classroom Layout
-                    <span class="hidden sm:inline-block px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full font-mono">v2.5 Responsive</span>
+                    <span class="hidden sm:inline-block px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full font-mono">v3.0 Dual-Responsive</span>
                 </h1>
                 <p class="text-[10px] md:text-xs text-emerald-400 font-medium">Spatial Design, Pedagogy Metrics & AI Diagnostic Audit</p>
             </div>
         </div>
 
         <!-- Desktop Main Toolbar -->
-        <div class="hidden lg:flex items-center gap-3 text-xs">
+        <div class="hidden lg:flex items-center gap-2.5 text-xs">
             <!-- Room Dimensions -->
-            <div class="flex items-center space-x-2 bg-slate-800/90 light:bg-slate-200 px-3 py-1.5 rounded-xl border border-slate-700/70">
+            <div class="flex items-center space-x-2 bg-slate-800/90 px-3 py-1.5 rounded-xl border border-slate-700/70">
                 <i data-lucide="ruler" class="w-4 h-4 text-emerald-400"></i>
-                <span class="font-medium text-slate-300 light:text-slate-700">Dim (m):</span>
-                <input type="number" id="roomLength" value="10" min="5" max="25" class="w-12 bg-slate-900 light:bg-white text-center rounded py-0.5 border border-slate-700 text-xs focus:outline-none focus:border-emerald-500">
+                <span class="font-medium text-slate-300">Dim (m):</span>
+                <input type="number" id="roomLength" value="10" min="5" max="25" class="w-12 bg-slate-900 text-center rounded py-0.5 border border-slate-700 text-xs focus:outline-none focus:border-emerald-500">
                 <span class="text-slate-500">×</span>
-                <input type="number" id="roomWidth" value="8" min="4" max="20" class="w-12 bg-slate-900 light:bg-white text-center rounded py-0.5 border border-slate-700 text-xs focus:outline-none focus:border-emerald-500">
+                <input type="number" id="roomWidth" value="8" min="4" max="20" class="w-12 bg-slate-900 text-center rounded py-0.5 border border-slate-700 text-xs focus:outline-none focus:border-emerald-500">
             </div>
 
             <!-- Target Capacity -->
-            <div class="flex items-center space-x-2 bg-slate-800/90 light:bg-slate-200 px-3 py-1.5 rounded-xl border border-slate-700/70">
+            <div class="flex items-center space-x-2 bg-slate-800/90 px-3 py-1.5 rounded-xl border border-slate-700/70">
                 <i data-lucide="users" class="w-4 h-4 text-teal-400"></i>
-                <span class="font-medium text-slate-300 light:text-slate-700">Target Students:</span>
-                <input type="number" id="targetStudents" value="30" min="5" max="60" class="w-12 bg-slate-900 light:bg-white text-center rounded py-0.5 border border-slate-700 text-xs focus:outline-none focus:border-emerald-500">
+                <span class="font-medium text-slate-300">Target Students:</span>
+                <input type="number" id="targetStudents" value="30" min="5" max="60" class="w-12 bg-slate-900 text-center rounded py-0.5 border border-slate-700 text-xs focus:outline-none focus:border-emerald-500">
+            </div>
+
+            <!-- Undo / Redo Actions -->
+            <div class="flex items-center gap-1 bg-slate-800/90 p-1 rounded-xl border border-slate-700/70">
+                <button id="undoBtn" class="p-1.5 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition" title="Undo"><i data-lucide="undo" class="w-3.5 h-3.5"></i></button>
+                <button id="redoBtn" class="p-1.5 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition" title="Redo"><i data-lucide="redo" class="w-3.5 h-3.5"></i></button>
             </div>
 
             <!-- Overlays & Toggles -->
-            <div class="flex items-center gap-1 bg-slate-800/90 light:bg-slate-200 p-1 rounded-xl border border-slate-700/70">
+            <div class="flex items-center gap-1 bg-slate-800/90 p-1 rounded-xl border border-slate-700/70">
                 <button id="toggleSightlinesBtn" class="px-2.5 py-1 rounded-lg text-xs flex items-center gap-1.5 bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 font-medium">
                     <i data-lucide="eye" class="w-3.5 h-3.5"></i> Sightlines
                 </button>
@@ -163,9 +168,6 @@
                 <button id="generateAiReportBtn" class="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-600/20 flex items-center gap-1.5 transition">
                     <i data-lucide="sparkles" class="w-4 h-4"></i> PAK-21 AI Audit
                 </button>
-                <button id="themeToggleBtn" class="p-2 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition" title="Toggle Light/Dark Theme">
-                    <i data-lucide="sun" class="w-4 h-4"></i>
-                </button>
             </div>
         </div>
 
@@ -178,7 +180,7 @@
     </header>
 
     <!-- MOBILE QUICK SETTINGS DRAWER -->
-    <div id="mobileSettingsDrawer" class="hidden lg:hidden bg-slate-900 border-b border-slate-800 p-3 flex-col gap-3 text-xs z-20">
+    <div id="mobileSettingsDrawer" class="hidden lg:hidden bg-slate-900 border-b border-slate-800 p-3 flex-col gap-3 text-xs z-20 shrink-0">
         <div class="flex justify-between items-center gap-2">
             <div class="flex items-center space-x-1.5">
                 <i data-lucide="ruler" class="w-3.5 h-3.5 text-emerald-400"></i>
@@ -199,20 +201,21 @@
                 <button id="toggleFlowBtnMob" class="px-2 py-1 rounded-lg text-[10px] bg-teal-600/30 text-teal-300 border border-teal-500/40">Flow Lines</button>
             </div>
             <div class="flex items-center gap-1">
+                <button id="undoBtnMob" class="p-1.5 text-slate-300 bg-slate-800 rounded-lg"><i data-lucide="undo" class="w-3.5 h-3.5"></i></button>
+                <button id="redoBtnMob" class="p-1.5 text-slate-300 bg-slate-800 rounded-lg"><i data-lucide="redo" class="w-3.5 h-3.5"></i></button>
                 <button id="exportImgBtnMob" class="p-1.5 text-slate-300 bg-slate-800 rounded-lg"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
-                <button id="themeToggleBtnMob" class="p-1.5 text-slate-400 bg-slate-800 rounded-lg"><i data-lucide="sun" class="w-3.5 h-3.5"></i></button>
                 <button id="resetCanvasBtnMob" class="p-1.5 text-rose-400 bg-slate-800 rounded-lg"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
             </div>
         </div>
     </div>
 
     <!-- MAIN APP CONTAINER -->
-    <main class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
+    <main class="flex-1 flex flex-col lg:flex-row overflow-hidden relative min-h-0 min-w-0">
         
         <!-- LEFT SIDEBAR: PRESETS & PALETTE (DESKTOP & MOBILE BOTTOM DRAWER) -->
-        <aside id="leftSidebar" class="w-full lg:w-80 glass-panel border-r border-slate-800 flex flex-col h-[40vh] lg:h-[calc(100vh-60px)] z-20 shrink-0 transition-all duration-300 hidden lg:flex">
+        <aside id="leftSidebar" class="w-full lg:w-80 glass-panel border-r border-slate-800 flex flex-col h-full z-20 shrink-0 transition-all duration-300 hidden lg:flex min-h-0">
             <!-- Sidebar Navigation Tabs -->
-            <div class="flex border-b border-slate-800 bg-slate-900/60">
+            <div class="flex border-b border-slate-800 bg-slate-900/60 shrink-0">
                 <button id="tabPresets" class="flex-1 py-3 text-xs font-semibold text-emerald-400 border-b-2 border-emerald-500 flex items-center justify-center gap-1.5">
                     <i data-lucide="layout-template" class="w-3.5 h-3.5"></i> PAK-21 Presets
                 </button>
@@ -222,7 +225,7 @@
             </div>
 
             <!-- Sidebar Scrollable Container -->
-            <div class="flex-1 overflow-y-auto p-4 space-y-4">
+            <div class="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
                 
                 <!-- PRESETS PANEL -->
                 <div id="panelPresets" class="space-y-3">
@@ -236,6 +239,16 @@
                             <span class="text-[9px] px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full font-mono">High Collab</span>
                         </div>
                         <p class="text-[11px] text-slate-400">4-6 student desk clusters. Ideal for group work, problem-solving & discussion.</p>
+                    </button>
+
+                    <button data-preset="stesen" class="preset-btn w-full p-3 rounded-xl bg-slate-800/80 hover:bg-emerald-950/40 border border-slate-700/80 hover:border-emerald-500/50 text-left transition group">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-semibold text-xs text-slate-200 group-hover:text-emerald-400 flex items-center gap-1.5">
+                                <i data-lucide="sparkles" class="w-4 h-4 text-cyan-400"></i> Stesen Pembelajaran
+                            </span>
+                            <span class="text-[9px] px-2 py-0.5 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded-full font-mono">Stations</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400">Learning stations, reading nook, & round project pods for active rotation.</p>
                     </button>
 
                     <button data-preset="horseshoe" class="preset-btn w-full p-3 rounded-xl bg-slate-800/80 hover:bg-emerald-950/40 border border-slate-700/80 hover:border-emerald-500/50 text-left transition group">
@@ -256,16 +269,6 @@
                             <span class="text-[9px] px-2 py-0.5 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-full font-mono">Focused</span>
                         </div>
                         <p class="text-[11px] text-slate-400">Angled concentric rows facing center board. Balance of focus & teacher sightline.</p>
-                    </button>
-
-                    <button data-preset="modular" class="preset-btn w-full p-3 rounded-xl bg-slate-800/80 hover:bg-emerald-950/40 border border-slate-700/80 hover:border-emerald-500/50 text-left transition group">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="font-semibold text-xs text-slate-200 group-hover:text-emerald-400 flex items-center gap-1.5">
-                                <i data-lucide="grid-3x3" class="w-4 h-4 text-amber-400"></i> Modular Stations
-                            </span>
-                            <span class="text-[9px] px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full font-mono">Rotation</span>
-                        </div>
-                        <p class="text-[11px] text-slate-400">Activity stations, round tables, and reading corners for rotation tasks.</p>
                     </button>
 
                     <button data-preset="traditional" class="preset-btn w-full p-3 rounded-xl bg-slate-800/80 hover:bg-emerald-950/40 border border-slate-700/80 hover:border-emerald-500/50 text-left transition group">
@@ -300,11 +303,19 @@
                             <span class="text-[10px] text-slate-500 font-mono">1.3m × 0.6m</span>
                         </button>
 
+                        <button data-add="trapezoid-desk" class="add-item-btn p-2.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-xl flex flex-col items-center justify-center text-center group transition">
+                            <div class="w-8 h-6 rounded bg-indigo-500/20 border border-indigo-400 flex items-center justify-center mb-1 group-hover:scale-110 transition">
+                                <i data-lucide="shapes" class="w-3.5 h-3.5 text-indigo-400"></i>
+                            </div>
+                            <span class="text-xs text-slate-300 font-medium">Trapezoid Pod</span>
+                            <span class="text-[10px] text-slate-500 font-mono">1.2m × 0.6m</span>
+                        </button>
+
                         <button data-add="round-table" class="add-item-btn p-2.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-xl flex flex-col items-center justify-center text-center group transition">
                             <div class="w-7 h-7 rounded-full bg-cyan-500/20 border border-cyan-400 flex items-center justify-center mb-1 group-hover:scale-110 transition">
                                 <i data-lucide="disc" class="w-3.5 h-3.5 text-cyan-400"></i>
                             </div>
-                            <span class="text-xs text-slate-300 font-medium">Round Pod</span>
+                            <span class="text-xs text-slate-300 font-medium">Round Table</span>
                             <span class="text-[10px] text-slate-500 font-mono">Ø 1.4m</span>
                         </button>
 
@@ -312,7 +323,7 @@
                             <div class="w-9 h-6 rounded bg-amber-500/20 border border-amber-400 flex items-center justify-center mb-1 group-hover:scale-110 transition">
                                 <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-amber-400"></i>
                             </div>
-                            <span class="text-xs text-slate-300 font-medium">Teacher Desk</span>
+                            <span class="text-xs text-slate-300 font-medium">Teacher Station</span>
                             <span class="text-[10px] text-slate-500 font-mono">1.5m × 0.8m</span>
                         </button>
 
@@ -336,16 +347,8 @@
                             <div class="w-9 h-7 rounded bg-rose-500/20 border border-rose-400 flex items-center justify-center mb-1 group-hover:scale-110 transition">
                                 <i data-lucide="presentation" class="w-3.5 h-3.5 text-rose-400"></i>
                             </div>
-                            <span class="text-xs text-slate-300 font-medium">Stage Zone</span>
+                            <span class="text-xs text-slate-300 font-medium">Reading Nook</span>
                             <span class="text-[10px] text-slate-500 font-mono">2.5m × 1.5m</span>
-                        </button>
-
-                        <button data-add="door" class="add-item-btn p-2.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-xl flex flex-col items-center justify-center text-center group transition">
-                            <div class="w-7 h-5 rounded bg-slate-600/40 border border-slate-400 flex items-center justify-center mb-1 group-hover:scale-110 transition">
-                                <i data-lucide="door-open" class="w-3.5 h-3.5 text-slate-300"></i>
-                            </div>
-                            <span class="text-xs text-slate-300 font-medium">Doorway</span>
-                            <span class="text-[10px] text-slate-500 font-mono">1.0m × 0.2m</span>
                         </button>
                     </div>
                 </div>
@@ -354,11 +357,11 @@
         </aside>
 
         <!-- CENTER WORKSPACE & CANVAS -->
-        <section class="flex-1 bg-slate-950 relative flex flex-col justify-center items-center p-2 md:p-4 overflow-hidden min-h-[50vh] lg:min-h-0">
+        <section class="flex-1 bg-slate-950 relative flex flex-col justify-center items-center p-2 md:p-4 overflow-hidden min-h-0 min-w-0">
             <!-- Canvas HUD Overlay -->
-            <div class="absolute top-3 left-3 md:top-5 md:left-5 z-10 glass-panel px-3 py-1.5 rounded-xl flex items-center gap-3 text-xs text-slate-300 shadow-xl">
+            <div class="absolute top-3 left-3 md:top-5 md:left-5 z-10 glass-panel px-3 py-1.5 rounded-xl flex items-center gap-3 text-xs text-slate-300 shadow-xl pointer-events-none">
                 <span class="flex items-center gap-1.5 font-medium">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Grid Scale: 1m = <span id="scaleMeterVal">50</span>px
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Scale: 1m = <span id="scaleMeterVal">60</span>px
                 </span>
                 <span class="text-slate-600">|</span>
                 <span id="canvasDimLabel" class="font-mono text-slate-400">10.0m x 8.0m</span>
@@ -371,15 +374,15 @@
             </div>
 
             <!-- INTERACTIVE CANVAS CONTAINER -->
-            <div id="canvasWrapper" class="relative shadow-2xl rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 transition-all duration-300 max-w-full max-h-full">
-                <canvas id="classroomCanvas"></canvas>
+            <div id="canvasWrapper" class="relative shadow-2xl rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 transition-all duration-300 max-w-full max-h-full flex items-center justify-center">
+                <canvas id="classroomCanvas" class="block cursor-crosshair"></canvas>
             </div>
         </section>
 
         <!-- RIGHT SIDEBAR: INSPECTOR & LIVE METRICS (DESKTOP) -->
-        <aside id="rightSidebar" class="w-full lg:w-80 glass-panel border-l border-slate-800 flex flex-col h-auto lg:h-[calc(100vh-60px)] z-20 shrink-0 hidden lg:flex">
+        <aside id="rightSidebar" class="w-full lg:w-80 glass-panel border-l border-slate-800 flex flex-col h-full z-20 shrink-0 hidden lg:flex min-h-0">
             <!-- Inspector / Selected Item Card -->
-            <div class="p-4 border-b border-slate-800 space-y-3">
+            <div class="p-4 border-b border-slate-800 space-y-3 shrink-0">
                 <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
                     <i data-lucide="sliders" class="w-4 h-4"></i> Item Inspector
                 </h3>
@@ -399,10 +402,16 @@
                         <input type="range" id="rotateSlider" min="0" max="345" step="15" value="0" class="w-full accent-emerald-500 bg-slate-900 rounded-lg cursor-pointer">
                     </div>
 
-                    <!-- Custom Label Input -->
+                    <!-- Layering & Custom Label -->
                     <div>
                         <label class="text-[11px] text-slate-400 block mb-1">Custom Label / Group #</label>
                         <input type="text" id="itemLabelInput" placeholder="e.g. Group 1 Desk" class="w-full bg-slate-900 border border-slate-700 text-xs px-2.5 py-1.5 rounded-lg text-slate-200 focus:outline-none focus:border-emerald-500">
+                    </div>
+
+                    <!-- Layer Actions -->
+                    <div class="flex items-center gap-2">
+                        <button id="bringFrontBtn" class="flex-1 py-1 bg-slate-800 hover:bg-slate-700 rounded text-[11px] text-slate-300">Front</button>
+                        <button id="sendBackBtn" class="flex-1 py-1 bg-slate-800 hover:bg-slate-700 rounded text-[11px] text-slate-300">Back</button>
                     </div>
 
                     <!-- Action Controls -->
@@ -423,7 +432,7 @@
             </div>
 
             <!-- Live Analytics Panel -->
-            <div class="flex-1 overflow-y-auto p-4 space-y-4">
+            <div class="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
                 <h3 class="text-xs font-bold text-teal-400 uppercase tracking-wider flex items-center gap-1.5">
                     <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Live PAK-21 Analytics
                 </h3>
@@ -486,7 +495,7 @@
     </div>
 
     <!-- MOBILE BOTTOM NAVIGATION TAB BAR -->
-    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 border-t border-slate-800 px-2 py-2 flex justify-around items-center glass-panel">
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 border-t border-slate-800 px-2 py-2 flex justify-around items-center glass-panel shrink-0">
         <button id="mobNavPresets" class="flex flex-col items-center text-emerald-400">
             <i data-lucide="layout-template" class="w-4 h-4"></i>
             <span class="text-[10px] mt-0.5">Presets</span>
@@ -507,7 +516,7 @@
 
     <!-- THREE.JS 3D SPATIAL ORBIT MODAL -->
     <div id="modal3d" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex flex-col items-center justify-center p-2 md:p-6">
-        <div class="w-full max-w-6xl glass-panel rounded-2xl border border-slate-800 p-4 flex justify-between items-center z-10">
+        <div class="w-full max-w-6xl glass-panel rounded-2xl border border-slate-800 p-4 flex justify-between items-center z-10 shrink-0">
             <div class="flex items-center space-x-3">
                 <div class="p-2 bg-indigo-500/20 text-indigo-400 rounded-xl"><i data-lucide="box" class="w-5 h-5"></i></div>
                 <div>
@@ -521,7 +530,7 @@
         </div>
 
         <!-- 3D Canvas Viewport -->
-        <div id="container3d" class="w-full max-w-6xl flex-1 my-3 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl relative">
+        <div id="container3d" class="w-full max-w-6xl flex-1 my-3 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl relative min-h-0">
             <div id="loading3d" class="absolute inset-0 flex items-center justify-center bg-slate-900 text-slate-300 font-medium text-xs">
                 <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-emerald-400 mr-2"></i> Rendering 3D Scene Mesh...
             </div>
@@ -532,7 +541,7 @@
     <div id="modalAiReport" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-3 md:p-6 overflow-y-auto">
         <div class="glass-panel w-full max-w-3xl rounded-2xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col my-auto max-h-[90vh]">
             <!-- Modal Header -->
-            <div class="bg-gradient-to-r from-emerald-900/40 via-teal-900/30 to-slate-900 p-5 border-b border-slate-800 flex items-center justify-between">
+            <div class="bg-gradient-to-r from-emerald-900/40 via-teal-900/30 to-slate-900 p-5 border-b border-slate-800 flex items-center justify-between shrink-0">
                 <div class="flex items-center space-x-3">
                     <div class="p-2.5 bg-emerald-500/20 border border-emerald-500/40 rounded-xl">
                         <i data-lucide="sparkles" class="w-6 h-6 text-emerald-400"></i>
@@ -548,12 +557,12 @@
             </div>
 
             <!-- Modal Dynamic Content -->
-            <div id="reportContent" class="p-5 md:p-6 space-y-6 overflow-y-auto text-slate-200 text-xs md:text-sm">
+            <div id="reportContent" class="p-5 md:p-6 space-y-6 overflow-y-auto text-slate-200 text-xs md:text-sm min-h-0">
                 <!-- Content injected via JavaScript -->
             </div>
 
             <!-- Modal Footer -->
-            <div class="bg-slate-900/90 px-6 py-4 border-t border-slate-800 flex justify-between items-center no-print">
+            <div class="bg-slate-900/90 px-6 py-4 border-t border-slate-800 flex justify-between items-center no-print shrink-0">
                 <span class="text-[11px] text-slate-500 hidden sm:inline">Based on Malaysian Ministry of Education PAK-21 Directives</span>
                 <div class="flex space-x-3">
                     <button id="printReportBtn" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs rounded-xl flex items-center gap-2 border border-slate-700 transition">
@@ -570,13 +579,13 @@
     <!-- APPLICATION CONTROLLER SCRIPT -->
     <script>
         /* ==========================================================================
-           GLOBAL APP STATE & CONFIGURATION
+           GLOBAL APP STATE & HISTORY ENGINE
            ========================================================================== */
         const state = {
             roomLengthMeters: 10,
             roomWidthMeters: 8,
             targetStudents: 30,
-            scale: 50, // 1 Meter = 50 Pixels
+            scale: 60, // 1 Meter = 60 Physical Scale Base
             gridSnap: true,
             showSightlines: true,
             showFlow: true,
@@ -584,56 +593,92 @@
             selectedItemId: null,
             isDragging: false,
             dragOffset: { x: 0, y: 0 },
-            zoomLevel: 1.0
+            zoomLevel: 1.0,
+            history: [],
+            historyIndex: -1
         };
 
-        // Furniture Metadata Catalog
         const ITEM_TYPES = {
             'single-desk': { width: 0.7, height: 0.6, color: '#3b82f6', label: 'Single Desk', capacity: 1, shape: 'rect' },
             'double-desk': { width: 1.3, height: 0.6, color: '#06b6d4', label: 'Double Desk', capacity: 2, shape: 'rect' },
-            'round-table': { width: 1.4, height: 1.4, color: '#0ea5e9', label: 'Round Pod', capacity: 4, shape: 'circle' },
-            'teacher-desk': { width: 1.5, height: 0.8, color: '#f59e0b', label: 'Teacher Desk', capacity: 0, shape: 'rect' },
-            'smartboard': { width: 2.2, height: 0.25, color: '#6366f1', label: 'Smartboard', capacity: 0, shape: 'rect' },
+            'trapezoid-desk': { width: 1.2, height: 0.6, color: '#6366f1', label: 'Trapezoid Pod', capacity: 2, shape: 'rect' },
+            'round-table': { width: 1.4, height: 1.4, color: '#0ea5e9', label: 'Round Table', capacity: 4, shape: 'circle' },
+            'teacher-desk': { width: 1.5, height: 0.8, color: '#f59e0b', label: 'Teacher Station', capacity: 0, shape: 'rect' },
+            'smartboard': { width: 2.2, height: 0.25, color: '#4f46e5', label: 'Smartboard', capacity: 0, shape: 'rect' },
             'bookshelf': { width: 1.2, height: 0.4, color: '#a855f7', label: 'Bookshelf', capacity: 0, shape: 'rect' },
-            'presentation-mat': { width: 2.5, height: 1.5, color: '#f43f5e', label: 'Stage Zone', capacity: 0, shape: 'rect' },
+            'presentation-mat': { width: 2.5, height: 1.5, color: '#f43f5e', label: 'Reading Nook', capacity: 0, shape: 'rect' },
             'door': { width: 1.0, height: 0.2, color: '#64748b', label: 'Doorway', capacity: 0, shape: 'rect' }
         };
 
         let canvas, ctx;
         let threeRenderer, threeScene, threeCamera, threeControls;
 
-        /* ==========================================================================
-           INITIALIZATION & EVENT BINDING
-           ========================================================================== */
         window.addEventListener('DOMContentLoaded', () => {
             initCanvas();
             bindEvents();
-            loadPreset('kumpulan'); // Default layout
+            loadPreset('kumpulan');
             lucide.createIcons();
         });
 
+        function saveHistory() {
+            if (state.historyIndex < state.history.length - 1) {
+                state.history = state.history.slice(0, state.historyIndex + 1);
+            }
+            state.history.push(JSON.stringify(state.items));
+            state.historyIndex++;
+        }
+
+        function undo() {
+            if (state.historyIndex > 0) {
+                state.historyIndex--;
+                state.items = JSON.parse(state.history[state.historyIndex]);
+                renderCanvas();
+                updateMetrics();
+            }
+        }
+
+        function redo() {
+            if (state.historyIndex < state.history.length - 1) {
+                state.historyIndex++;
+                state.items = JSON.parse(state.history[state.historyIndex]);
+                renderCanvas();
+                updateMetrics();
+            }
+        }
+
+        /* Pixel-perfect resolution dynamic scaling to prevent GitHub pages shift */
         function initCanvas() {
             canvas = document.getElementById('classroomCanvas');
             ctx = canvas.getContext('2d');
             updateCanvasSize();
+            window.addEventListener('resize', updateCanvasSize);
         }
 
         function updateCanvasSize() {
-            const lengthInput = document.getElementById('roomLength').value || 10;
-            const widthInput = document.getElementById('roomWidth').value || 8;
+            const lengthInput = document.getElementById('roomLength')?.value || 10;
+            const widthInput = document.getElementById('roomWidth')?.value || 8;
 
             state.roomLengthMeters = parseFloat(lengthInput);
             state.roomWidthMeters = parseFloat(widthInput);
 
-            canvas.width = state.roomLengthMeters * state.scale * state.zoomLevel;
-            canvas.height = state.roomWidthMeters * state.scale * state.zoomLevel;
+            const dpr = window.devicePixelRatio || 1;
+            const cssWidth = state.roomLengthMeters * state.scale * state.zoomLevel;
+            const cssHeight = state.roomWidthMeters * state.scale * state.zoomLevel;
+
+            canvas.style.width = cssWidth + 'px';
+            canvas.style.height = cssHeight + 'px';
+
+            canvas.width = Math.floor(cssWidth * dpr);
+            canvas.height = Math.floor(cssHeight * dpr);
+
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
 
             document.getElementById('canvasDimLabel').innerText = `${state.roomLengthMeters.toFixed(1)}m x ${state.roomWidthMeters.toFixed(1)}m`;
             renderCanvas();
         }
 
         function bindEvents() {
-            // Inputs & Controls
             document.getElementById('roomLength')?.addEventListener('change', updateCanvasSize);
             document.getElementById('roomWidth')?.addEventListener('change', updateCanvasSize);
             document.getElementById('targetStudents')?.addEventListener('change', (e) => {
@@ -641,7 +686,9 @@
                 updateMetrics();
             });
 
-            // Toggles
+            document.getElementById('undoBtn')?.addEventListener('click', undo);
+            document.getElementById('redoBtn')?.addEventListener('click', redo);
+
             document.getElementById('toggleSightlinesBtn')?.addEventListener('click', () => {
                 state.showSightlines = !state.showSightlines;
                 renderCanvas();
@@ -654,7 +701,6 @@
                 state.gridSnap = !state.gridSnap;
             });
 
-            // Canvas Zooming
             document.getElementById('zoomInBtn')?.addEventListener('click', () => {
                 state.zoomLevel = Math.min(1.8, state.zoomLevel + 0.1);
                 updateCanvasSize();
@@ -664,7 +710,6 @@
                 updateCanvasSize();
             });
 
-            // Presets & Palette Buttons
             document.querySelectorAll('.preset-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const preset = e.currentTarget.getAttribute('data-preset');
@@ -679,7 +724,6 @@
                 });
             });
 
-            // Canvas Mouse & Touch Events
             canvas.addEventListener('mousedown', handleCanvasMouseDown);
             canvas.addEventListener('mousemove', handleCanvasMouseMove);
             window.addEventListener('mouseup', handleCanvasMouseUp);
@@ -688,13 +732,32 @@
             canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
             window.addEventListener('touchend', handleCanvasMouseUp);
 
-            // Item Inspector Events
             document.getElementById('rotateSlider')?.addEventListener('input', (e) => {
                 if (state.selectedItemId === null) return;
                 const item = state.items.find(i => i.id === state.selectedItemId);
                 if (item) {
                     item.rotation = parseInt(e.target.value);
                     document.getElementById('rotateValDisplay').innerText = `${item.rotation}°`;
+                    renderCanvas();
+                }
+            });
+
+            document.getElementById('bringFrontBtn')?.addEventListener('click', () => {
+                if (state.selectedItemId === null) return;
+                const idx = state.items.findIndex(i => i.id === state.selectedItemId);
+                if (idx > -1) {
+                    const [item] = state.items.splice(idx, 1);
+                    state.items.push(item);
+                    renderCanvas();
+                }
+            });
+
+            document.getElementById('sendBackBtn')?.addEventListener('click', () => {
+                if (state.selectedItemId === null) return;
+                const idx = state.items.findIndex(i => i.id === state.selectedItemId);
+                if (idx > -1) {
+                    const [item] = state.items.splice(idx, 1);
+                    state.items.unshift(item);
                     renderCanvas();
                 }
             });
@@ -716,10 +779,10 @@
                 hideInspector();
                 renderCanvas();
                 updateMetrics();
+                saveHistory();
             });
             document.getElementById('exportImgBtn')?.addEventListener('click', exportCanvasImage);
 
-            // Modals
             document.getElementById('open3dBtn')?.addEventListener('click', open3DModal);
             document.getElementById('close3dBtn')?.addEventListener('click', close3DModal);
             document.getElementById('mobileOpen3dBtn')?.addEventListener('click', open3DModal);
@@ -730,17 +793,9 @@
             document.getElementById('closeReportBtn')?.addEventListener('click', () => document.getElementById('modalAiReport').classList.add('hidden'));
             document.getElementById('printReportBtn')?.addEventListener('click', () => window.print());
 
-            // Theme Toggle
-            document.getElementById('themeToggleBtn')?.addEventListener('click', () => {
-                document.documentElement.classList.toggle('dark');
-                renderCanvas();
-            });
-
-            // Sidebar Tabs (Desktop/Mobile)
             document.getElementById('tabPresets')?.addEventListener('click', () => switchSidebarTab('presets'));
             document.getElementById('tabPalette')?.addEventListener('click', () => switchSidebarTab('palette'));
 
-            // Mobile Navigation Toggle
             bindMobileNav();
         }
 
@@ -797,9 +852,7 @@
             });
         }
 
-        /* ==========================================================================
-           PAK-21 PRESET LAYOUT ENGINE
-           ========================================================================== */
+        /* Presets loader */
         function loadPreset(presetName) {
             state.items = [];
             state.selectedItemId = null;
@@ -808,7 +861,6 @@
             const L = state.roomLengthMeters;
             const W = state.roomWidthMeters;
 
-            // Anchor Items
             state.items.push({ id: Date.now() + 1, type: 'smartboard', x: L / 2 - 1.1, y: 0.3, rotation: 0, customLabel: 'Front Smartboard' });
             state.items.push({ id: Date.now() + 2, type: 'teacher-desk', x: L / 2 - 0.75, y: 1.2, rotation: 0, customLabel: 'Teacher Desk' });
             state.items.push({ id: Date.now() + 3, type: 'door', x: 0.2, y: W - 0.5, rotation: 0, customLabel: 'Main Entrance' });
@@ -827,6 +879,11 @@
                         groupNum++;
                     }
                 });
+            } else if (presetName === 'stesen') {
+                state.items.push({ id: Date.now() + Math.random(), type: 'round-table', x: 1.8, y: 3.0, rotation: 0, customLabel: 'Station 1' });
+                state.items.push({ id: Date.now() + Math.random(), type: 'trapezoid-desk', x: L - 3.2, y: 3.0, rotation: 0, customLabel: 'Station 2' });
+                state.items.push({ id: Date.now() + Math.random(), type: 'round-table', x: 1.8, y: 5.5, rotation: 0, customLabel: 'Station 3' });
+                state.items.push({ id: Date.now() + Math.random(), type: 'presentation-mat', x: L / 2 - 1.25, y: 4.5, rotation: 0, customLabel: 'Reading Nook' });
             } else if (presetName === 'horseshoe') {
                 state.items.push({ id: Date.now() + 5, type: 'presentation-mat', x: L / 2 - 1.25, y: 3.5, rotation: 0, customLabel: 'Stage Zone' });
                 for (let i = 0; i < 4; i++) state.items.push({ id: Date.now() + Math.random(), type: 'double-desk', x: 1.5, y: 2.5 + i * 1.1, rotation: 90, customLabel: 'U-Wing L' });
@@ -839,12 +896,6 @@
                     state.items.push({ id: Date.now() + Math.random(), type: 'double-desk', x: L / 2 - 0.65, y: rowY, rotation: 0, customLabel: `Row ${r+1}` });
                     state.items.push({ id: Date.now() + Math.random(), type: 'double-desk', x: L - 2.8, y: rowY, rotation: 345, customLabel: `Row ${r+1}` });
                 }
-            } else if (presetName === 'modular') {
-                state.items.push({ id: Date.now() + Math.random(), type: 'round-table', x: 2.0, y: 3.0, rotation: 0, customLabel: 'Station A' });
-                state.items.push({ id: Date.now() + Math.random(), type: 'round-table', x: L - 3.4, y: 3.0, rotation: 0, customLabel: 'Station B' });
-                state.items.push({ id: Date.now() + Math.random(), type: 'round-table', x: 2.0, y: 5.5, rotation: 0, customLabel: 'Station C' });
-                state.items.push({ id: Date.now() + Math.random(), type: 'round-table', x: L - 3.4, y: 5.5, rotation: 0, customLabel: 'Station D' });
-                state.items.push({ id: Date.now() + Math.random(), type: 'presentation-mat', x: L / 2 - 1.25, y: 4.0, rotation: 0, customLabel: 'Discussion Area' });
             } else if (presetName === 'traditional') {
                 for (let r = 0; r < 4; r++) {
                     for (let c = 0; c < 4; c++) {
@@ -855,43 +906,40 @@
 
             renderCanvas();
             updateMetrics();
+            saveHistory();
         }
 
-        /* ==========================================================================
-           2D CANVAS DRAWING ENGINE
-           ========================================================================== */
+        /* 2D Canvas rendering loop */
         function renderCanvas() {
             if (!ctx) return;
-            const isDark = document.documentElement.classList.contains('dark');
             const scale = state.scale * state.zoomLevel;
 
-            ctx.fillStyle = isDark ? '#0b0f19' : '#f8fafc';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0b0f19';
+            ctx.fillRect(0, 0, state.roomLengthMeters * scale, state.roomWidthMeters * scale);
 
-            // Draw Metric Grid Lines
-            ctx.strokeStyle = isDark ? 'rgba(51, 65, 85, 0.4)' : 'rgba(203, 213, 225, 0.8)';
+            ctx.strokeStyle = 'rgba(51, 65, 85, 0.4)';
             ctx.lineWidth = 1;
 
-            for (let x = 0; x <= canvas.width; x += scale) {
+            for (let x = 0; x <= state.roomLengthMeters * scale; x += scale) {
                 ctx.beginPath();
                 ctx.moveTo(x, 0);
-                ctx.lineTo(x, canvas.height);
+                ctx.lineTo(x, state.roomWidthMeters * scale);
                 ctx.stroke();
             }
-            for (let y = 0; y <= canvas.height; y += scale) {
+            for (let y = 0; y <= state.roomWidthMeters * scale; y += scale) {
                 ctx.beginPath();
                 ctx.moveTo(0, y);
-                ctx.lineTo(canvas.width, y);
+                ctx.lineTo(state.roomLengthMeters * scale, y);
                 ctx.stroke();
             }
 
-            if (state.showFlow) drawPathwaysOverlay(scale, isDark);
+            if (state.showFlow) drawPathwaysOverlay(scale);
             if (state.showSightlines) drawSightlinesOverlay(scale);
 
-            state.items.forEach(item => drawFurnitureItem(item, scale, isDark));
+            state.items.forEach(item => drawFurnitureItem(item, scale));
         }
 
-        function drawFurnitureItem(item, scale, isDark) {
+        function drawFurnitureItem(item, scale) {
             const def = ITEM_TYPES[item.type] || ITEM_TYPES['single-desk'];
             const widthPx = def.width * scale;
             const heightPx = def.height * scale;
@@ -910,7 +958,7 @@
             }
 
             ctx.fillStyle = item.type === 'presentation-mat' ? 'rgba(244, 63, 94, 0.18)' : def.color;
-            ctx.strokeStyle = isSelected ? '#22c55e' : (isDark ? '#e2e8f0' : '#1e293b');
+            ctx.strokeStyle = isSelected ? '#22c55e' : '#e2e8f0';
             ctx.lineWidth = isSelected ? 2.5 : 1.5;
 
             if (def.shape === 'circle') {
@@ -949,7 +997,7 @@
 
             ctx.beginPath();
             ctx.moveTo(tx, ty);
-            ctx.arc(tx, ty, canvas.width * 0.9, Math.PI * 0.15, Math.PI * 0.85);
+            ctx.arc(tx, ty, state.roomLengthMeters * scale * 0.9, Math.PI * 0.15, Math.PI * 0.85);
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
@@ -971,13 +1019,13 @@
             ctx.restore();
         }
 
-        function drawPathwaysOverlay(scale, isDark) {
+        function drawPathwaysOverlay(scale) {
             ctx.save();
-            ctx.strokeStyle = isDark ? 'rgba(251, 191, 36, 0.2)' : 'rgba(217, 119, 6, 0.25)';
+            ctx.strokeStyle = 'rgba(251, 191, 36, 0.2)';
             ctx.lineWidth = 16;
             ctx.lineCap = 'round';
-            const L = canvas.width;
-            const W = canvas.height;
+            const L = state.roomLengthMeters * scale;
+            const W = state.roomWidthMeters * scale;
 
             ctx.beginPath();
             ctx.moveTo(L / 2, scale * 1.5);
@@ -988,9 +1036,6 @@
             ctx.restore();
         }
 
-        /* ==========================================================================
-           INTERACTION & SELECTION HANDLING
-           ========================================================================== */
         function getItemAtCoords(x, y) {
             const scale = state.scale * state.zoomLevel;
             for (let i = state.items.length - 1; i >= 0; i--) {
@@ -1051,7 +1096,10 @@
         }
 
         function handleCanvasMouseUp() {
-            state.isDragging = false;
+            if (state.isDragging) {
+                state.isDragging = false;
+                saveHistory();
+            }
         }
 
         function handleTouchStart(e) {
@@ -1087,6 +1135,7 @@
             showInspector(newItem);
             renderCanvas();
             updateMetrics();
+            saveHistory();
         }
 
         function duplicateSelectedItem() {
@@ -1106,6 +1155,7 @@
             showInspector(duplicate);
             renderCanvas();
             updateMetrics();
+            saveHistory();
         }
 
         function deleteSelectedItem() {
@@ -1115,6 +1165,7 @@
             hideInspector();
             renderCanvas();
             updateMetrics();
+            saveHistory();
         }
 
         function showInspector(item) {
@@ -1138,9 +1189,6 @@
             link.click();
         }
 
-        /* ==========================================================================
-           METRICS & ANALYTICS CALCULATOR
-           ========================================================================== */
         function updateMetrics() {
             let currentSeats = 0;
             let collabDesks = 0;
@@ -1151,7 +1199,7 @@
                 currentSeats += cap;
                 if (cap > 0) {
                     totalDesks++;
-                    if (item.type === 'double-desk' || item.type === 'round-table') collabDesks++;
+                    if (item.type === 'double-desk' || item.type === 'round-table' || item.type === 'trapezoid-desk') collabDesks++;
                 }
             });
 
@@ -1177,9 +1225,7 @@
             document.getElementById('metricPathwayBar').style.width = `${pathwayVal}%`;
         }
 
-        /* ==========================================================================
-           THREE.JS 3D SPATIAL ORBIT SIMULATION
-           ========================================================================== */
+        /* 3D WebGL Spatial Orbit Modal */
         function open3DModal() {
             document.getElementById('modal3d').classList.remove('hidden');
             setTimeout(() => {
@@ -1273,9 +1319,7 @@
             animate3D();
         }
 
-        /* ==========================================================================
-           AI DIAGNOSTIC AUDIT REPORT GENERATOR
-           ========================================================================== */
+        /* Printable AI Diagnostic Report Modal */
         function generateAiReport() {
             const modal = document.getElementById('modalAiReport');
             const content = document.getElementById('reportContent');
@@ -1285,7 +1329,7 @@
 
             const hasSmartboard = state.items.some(i => i.type === 'smartboard');
             const hasStage = state.items.some(i => i.type === 'presentation-mat');
-            const groupDesks = state.items.filter(i => i.type === 'double-desk' || i.type === 'round-table').length;
+            const groupDesks = state.items.filter(i => i.type === 'double-desk' || i.type === 'round-table' || i.type === 'trapezoid-desk').length;
 
             let layoutTypeStr = groupDesks > 4 ? 'Flexible Collaborative Pods (Kumpulan)' : 'Linear Exam Seating';
 
@@ -1323,7 +1367,7 @@
                             <div class="p-1.5 bg-blue-500/20 text-blue-400 rounded-lg mt-0.5"><i data-lucide="presentation" class="w-4 h-4"></i></div>
                             <div>
                                 <h4 class="font-semibold text-xs text-slate-200">Student Presentation Zone</h4>
-                                <p class="text-xs text-slate-400 mt-0.5">${hasStage ? 'Dedicated presentation space detected. Facilitates student showcase and gallery walks.' : 'Add a Stage Zone element to encourage active presentation tasks.'}</p>
+                                <p class="text-xs text-slate-400 mt-0.5">${hasStage ? 'Dedicated presentation space detected. Facilitates student showcase and gallery walks.' : 'Add a Stage Zone / Reading Nook element to encourage active presentation tasks.'}</p>
                             </div>
                         </div>
 
